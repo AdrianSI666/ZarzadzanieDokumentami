@@ -8,9 +8,10 @@ import org.springframework.stereotype.Component;
 public class FileDTOMapper implements DTOMapper<File, FileDTO> {
     @Override
     public FileDTO map(File source) {
-        Long id = source.getId();
-        String extension = source.getExtension();
-        byte[] content = source.getContent();
-        return new FileDTO(id, extension, content);
+        return FileDTO.builder()
+                .id(source.getId())
+                .extension(source.getExtension())
+                .content(source.getContent())
+                .build();
     }
 }

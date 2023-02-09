@@ -1,8 +1,11 @@
 package com.asledz.kancelaria_prawnicza.dto;
 
+import lombok.Builder;
+
 import java.util.Arrays;
 import java.util.Objects;
 
+@Builder
 public record FileDTO(
         Long id,
         String extension,

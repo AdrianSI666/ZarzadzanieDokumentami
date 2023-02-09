@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 public class UserDTOMapper implements DTOMapper<User, UserDTO> {
     @Override
     public UserDTO map(User source) {
-        Long id = source.getId();
-        String name = source.getName();
-        String surname = source.getSurname();
-        String email = source.getEmail();
-        return new UserDTO(id, name, surname, email);
+        return UserDTO.builder()
+                .id(source.getId())
+                .name(source.getName())
+                .surname(source.getSurname())
+                .email(source.getEmail())
+                .build();
     }
 }

@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 public class RoleDTOMapper implements DTOMapper<Role, RoleDTO> {
     @Override
     public RoleDTO map(Role source) {
-        Long id = source.getId();
-        String name = source.getName();
-        return new RoleDTO(id, name);
+        return RoleDTO.builder()
+                .id(source.getId())
+                .name(source.getName())
+                .build();
     }
 }

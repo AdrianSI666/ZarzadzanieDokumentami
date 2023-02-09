@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 public class TagDTOMapper implements DTOMapper<Tag, TagDTO> {
     @Override
     public TagDTO map(Tag source) {
-        Long id = source.getId();
-        String name = source.getName();
-        return new TagDTO(id, name);
+        return TagDTO.builder()
+                .id(source.getId())
+                .name(source.getName())
+                .build();
     }
 }

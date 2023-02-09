@@ -56,8 +56,9 @@ public class RoleService {
 
     public RoleDTO addRole(RoleDTO newRoleInformation) {
         log.info("Adding Role:" + newRoleInformation);
-        Role role = new Role();
-        role.setName(newRoleInformation.name());
+        Role role = Role.builder()
+                .name(newRoleInformation.name())
+                .build();
         return mapper.map(roleRepository.save(role));
     }
 

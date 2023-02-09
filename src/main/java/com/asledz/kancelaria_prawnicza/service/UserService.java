@@ -56,10 +56,11 @@ public class UserService {
 
     public UserDTO addUser(UserDTO newUserInformation) {
         log.info("Adding user:" + newUserInformation);
-        User user = new User();
-        user.setName(newUserInformation.name());
-        user.setSurname(newUserInformation.surname());
-        user.setEmail(newUserInformation.email());
+        User user = User.builder()
+                .name(newUserInformation.name())
+                .surname(newUserInformation.surname())
+                .email(newUserInformation.email())
+                .build();
         //TODO Przydzielanie podstawowej roli dla użytkownika lub dodanie, że podczas dodawania użytkownika podaje się jego rolę
         //user.setRoles();
         return mapper.map(userRepository.save(user));
