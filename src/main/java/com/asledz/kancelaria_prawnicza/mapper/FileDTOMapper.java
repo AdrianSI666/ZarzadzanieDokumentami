@@ -10,6 +10,7 @@ public class FileDTOMapper implements DTOMapper<File, FileDTO> {
     public FileDTO map(File source) {
         return FileDTO.builder()
                 .id(source.getId())
+                .name(source.getDocument().getTitle())
                 .extension(source.getExtension())
                 .content(source.getContent())
                 .build();

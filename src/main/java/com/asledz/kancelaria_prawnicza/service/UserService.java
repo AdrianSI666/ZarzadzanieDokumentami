@@ -41,6 +41,14 @@ public class UserService {
                 () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, id))
         ));
     }
+    //TODO ta metoda jest tylko tymczasowa do zastąpienia przez Security
+    public UserDTO getUserByName(String name) {
+        log.info("Getting user with name: %s".formatted(name));
+        CustomSpecification<User> specByName = new CustomSpecification<>(new SearchCriteria("name", ":", name));
+        return mapper.map(userRepository.findOne(specByName).orElseThrow(
+                () -> new NotFoundException("Couldn't find user with name: %s".formatted(name))
+        ));
+    }
 
     public Page<UserDTO> getUsersByRole(Long roleId, Integer page) {
         log.info("Getting users by roleId: %d".formatted(roleId));

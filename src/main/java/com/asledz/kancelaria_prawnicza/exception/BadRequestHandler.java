@@ -9,15 +9,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Clock;
 
-/**
- * Exception handler that handle NotFoundException exceptions that occurs when
- * user wants to get data that doesn't exist.
- */
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
-public class NotFoundExceptionHandler {
-    private static final String MESSAGE = "The requested data could not be found";
+public class BadRequestHandler {
+    private static final String MESSAGE = "Given data cannot be processed due to conflict with existing data";
     private final Clock clock;
 
     /**
@@ -26,10 +22,10 @@ public class NotFoundExceptionHandler {
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status.
      */
-    @ExceptionHandler(value = {NotFoundException.class})
-    public ResponseEntity<Object> handleNotFoundException(NotFoundException e) {
-        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-        log.error("Object not found. Exception occurred: %s".formatted(e.getMessage()), e);
+    @ExceptionHandler(value = {BadRequestException.class})
+    public ResponseEntity<Object> handleDataConflict(BadRequestException e) {
+        HttpStatus httpStatus = HttpStatus.CONFLICT;
+        log.error("Exception in processing request occurred: " + e.getMessage(), e);
         ExceptionData exceptionData = new ExceptionData(MESSAGE, httpStatus, clock.instant());
         return new ResponseEntity<>(exceptionData, httpStatus);
     }

@@ -38,6 +38,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<UserDTO> getUserByName(@PathVariable String name) {
+        return ResponseEntity.ok(userService.getUserByName(name));
+    }
+
     @GetMapping(Path.ROLE_VALUE + "/{id}")
     public ResponseEntity<Map<String, Object>> getUsersByRoleId(@PathVariable Long id, @RequestParam(defaultValue = "1") Integer page) {
         Page<UserDTO> userDTOPage = userService.getUsersByRole(id, page);

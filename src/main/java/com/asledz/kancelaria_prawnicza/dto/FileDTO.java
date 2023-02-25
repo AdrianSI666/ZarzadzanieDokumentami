@@ -8,6 +8,7 @@ import java.util.Objects;
 @Builder
 public record FileDTO(
         Long id,
+        String name,
         String extension,
         byte[] content
 ) {

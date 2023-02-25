@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,6 +32,11 @@ public class DocumentController {
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getDocuments(@RequestParam(defaultValue = "1") Integer page) {
         Page<DocumentDTO> documentDTOPage = documentService.getDocuments(page);
+        List<DocumentDTO> documents = documentDTOPage.getContent();
+        Map<String, Object> response = new HashMap<>();
+        response.put("documents", documents);
+        response.put("currentPage", documentDTOPage.getNumber() + 1);
+        response.put("totalPages", documentDTOPage.getTotalPages());
         return ResponseEntity.ok().body(converter.convertDataFromPageToMap(documentDTOPage));
     }
 
