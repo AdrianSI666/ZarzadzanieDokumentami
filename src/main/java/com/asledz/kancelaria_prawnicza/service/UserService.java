@@ -7,13 +7,14 @@ import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.UserRepository;
 import com.asledz.kancelaria_prawnicza.specification.CustomSpecification;
 import com.asledz.kancelaria_prawnicza.specification.SearchCriteria;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor

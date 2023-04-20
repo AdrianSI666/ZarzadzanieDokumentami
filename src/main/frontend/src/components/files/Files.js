@@ -36,7 +36,8 @@ const Files = () => {
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data"
+            "Content-Type": "multipart/form-data",
+            "charset":"utf-8"
           }
         }).then(() => {
           setMessage("Plik pomyślnie dodany do bazy")
@@ -45,6 +46,7 @@ const Files = () => {
           setMessage("Wystąpił błąd podczas wysyłania pliku do bazy")
         })
     }))
+    setMessage("Plik jest wysyłany na serwer.")
     setTimeout(function () {
       setMessage(undefined)
     }, 4000);

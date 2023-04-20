@@ -7,13 +7,15 @@ import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.FileRepository;
-import jakarta.transaction.Transactional;
+import com.asledz.kancelaria_prawnicza.utilis.TextExtractor;
+import com.asledz.kancelaria_prawnicza.utilis.Zipper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 
 @Slf4j
@@ -43,9 +45,14 @@ public class FileService {
             } else {
                 fileName = "No name";
             }
+            //TODO analiza pliku
+            log.info(multipartFile.getContentType());
+            String textData = TextExtractor.extractTextFromFile(multipartFile.getInputStream(), multipartFile.getContentType(), fileName);
+            byte[] compressedBytes = Zipper.compress(bytesOfFile);
             File file = File.builder()
                     .extension(multipartFile.getContentType())
-                    .content(bytesOfFile)
+                    .text(textData)
+                    .content(compressedBytes)
                     .document(Document.builder()
                             .title(fileName)
                             .build())

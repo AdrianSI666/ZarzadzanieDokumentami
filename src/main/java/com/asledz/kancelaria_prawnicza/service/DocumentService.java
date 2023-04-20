@@ -9,14 +9,20 @@ import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.DocumentRepository;
 import com.asledz.kancelaria_prawnicza.specification.CustomSpecification;
 import com.asledz.kancelaria_prawnicza.specification.SearchCriteria;
-import jakarta.transaction.Transactional;
+import com.asledz.kancelaria_prawnicza.utilis.SearchUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Slf4j
@@ -24,11 +30,14 @@ import java.util.List;
 @Service
 @Transactional
 public class DocumentService {
+    private final EntityManager entityManager;
     private final DocumentRepository documentRepository;
 
     private final DTOMapper<Document, DocumentDTO> mapper;
+    private final SearchUtils searchUtils;
 
     protected static final String DOCUMENT_NOT_FOUND_MSG = "Couldn't find document with id: %d";
+
 
     public Page<DocumentDTO> getDocuments(Integer page) {
         log.info("Page %d of all documents".formatted(page));
@@ -36,6 +45,25 @@ public class DocumentService {
         page -= 1;
         Pageable paging = PageRequest.of(page, pageSize);
         Page<Document> documentPage = documentRepository.findAll(paging);
+
+        if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, "text", "adwokat")) {
+            FullTextEntityManager fullTextEntityManager
+                    = Search.getFullTextEntityManager(entityManager);
+            QueryBuilder queryBuilder = searchUtils.getQueryBuilder(fullTextEntityManager, File.class);
+            FullTextQuery fullTextQuery = fullTextEntityManager.createFullTextQuery(
+                    queryBuilder
+                            .keyword()
+                            .fuzzy()
+                            .withEditDistanceUpTo(2)
+                            .withPrefixLength(1)
+                            .onFields("text") //"document.title"
+                            .matching("wniosek")
+                            .createQuery(),
+                    File.class);
+            List<File> files = fullTextQuery.getResultList();
+            files.forEach(file -> log.info("Z fulltextSearch: " + file.getDocument().getId()));
+        }
+
         return documentPage.map(mapper::map);
     }
 
