@@ -60,6 +60,7 @@ public class DocumentService {
                             .matching("wniosek")
                             .createQuery(),
                     File.class);
+            @SuppressWarnings("unchecked")
             List<File> files = fullTextQuery.getResultList();
             files.forEach(file -> log.info("Z fulltextSearch: " + file.getDocument().getId()));
         }

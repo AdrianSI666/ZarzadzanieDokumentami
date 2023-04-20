@@ -3,7 +3,6 @@ package com.asledz.kancelaria_prawnicza.controller;
 import com.asledz.kancelaria_prawnicza.dto.FileDTO;
 import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.service.FileService;
-import com.asledz.kancelaria_prawnicza.utilis.Zipper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
