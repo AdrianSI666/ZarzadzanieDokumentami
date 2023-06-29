@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Controller for file class. Its functionality is to receive files and to send them to allow for download of files.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(Path.FILE_VALUE + "s")
@@ -23,20 +26,37 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileController {
     private final FileService fileService;
 
+    /**
+     * Endpoint to download file from backend.
+     * @param id of file that you want to download
+     * @return ResponseEntity with http header that show that body is a file and with body
+     * containing bytes of file.
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable Long id) {
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         FileDTO fileToSend = fileService.getFileById(id);
         log.info("Sending file with id:" +  id);
+        log.info(fileToSend.name());
+        String fileName = fileToSend.name()+fileToSend.extension();
+        log.info(fileName);
+        log.info(fileToSend.extension());
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileToSend.name() + "\"")
+                .contentType(MediaType.valueOf(fileToSend.extension()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(fileToSend.content());
     }
 
+    /**
+     * Endpoint to add file to database.
+     * @param formData - MultipartFile that contains bytes of file, InputStream and extension of file.
+     * @return ResponseEntity with note that everything went correct.
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> saveFile(@RequestParam("file") MultipartFile formData) {
         fileService.addFile(formData);
+        //Without this line tomcat doesn't delete temp upload file if worked with Gotenberg service
+        System.gc();
         return ResponseEntity.ok().body("Success");
     }
-
 }

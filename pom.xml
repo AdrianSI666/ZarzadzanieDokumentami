@@ -104,6 +104,12 @@
             <version>3.0.0-RC1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-tools</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
         <!-- Http client to connect to docker with Gotenberg instance to convert file to pdf -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

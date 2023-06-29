@@ -8,4 +8,5 @@ public class Path {
     public static final String TAG_VALUE = "/tag";
     public static final String TYPE_VALUE = "/type";
     public static final String USER_VALUE = "/user";
+    public static final String TEXT_VALUE = "/text";
 }

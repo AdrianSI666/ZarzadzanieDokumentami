@@ -24,7 +24,9 @@ public class TextExtractor {
     public static String extractTextFromFile(InputStream inputStream, String contentType, String fileName) throws IOException {
         log.info("Processing content type: %s".formatted(contentType));
         String textData;
-        switch (MimeType.valueOfMimeType(contentType)) {
+        MimeType mimeType = MimeType.valueOfMimeType(contentType);
+        log.info(String.valueOf(mimeType));
+        switch (mimeType) {
             case DOC -> {
                 POIFSFileSystem fs = new POIFSFileSystem(inputStream);
                 HWPFDocument doc = new HWPFDocument(fs);

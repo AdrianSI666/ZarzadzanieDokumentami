@@ -1,6 +1,13 @@
 package com.asledz.kancelaria_prawnicza.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.search.annotations.ContainedIn;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,12 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.Collection;
 
 @AllArgsConstructor
@@ -41,5 +42,6 @@ public class User {
     private Collection<Role> roles;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
     @JsonBackReference(value = "owner")
+    @ContainedIn
     private Collection<Document> documents;
 }

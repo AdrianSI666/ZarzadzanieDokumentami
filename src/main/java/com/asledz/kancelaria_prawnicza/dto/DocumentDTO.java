@@ -11,6 +11,8 @@ public record DocumentDTO(
         Instant date,
         Double cost,
         Boolean paid,
+        Long typeId,
         String typeName
+
 ) {
 }

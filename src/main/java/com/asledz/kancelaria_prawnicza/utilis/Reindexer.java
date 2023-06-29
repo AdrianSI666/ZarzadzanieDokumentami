@@ -19,7 +19,6 @@ import javax.transaction.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class Reindexer {
     @PersistenceContext
     private EntityManager entityManager;
