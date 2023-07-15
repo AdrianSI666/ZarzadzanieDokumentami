@@ -9,11 +9,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Clock;
 
+/**
+ * Exception handler that handle Forbidden exceptions that occurs when
+ * pearson doesn't have permissions to requested data.
+ */
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
-public class ServerErrorHandler {
-    private static final String MESSAGE = "There was error on the server while processing your request. Try again later.";
+public class ForbiddenExceptionHandler {
+    private static final String MESSAGE = "You don't have permission for this operation.";
     private final Clock clock;
 
     /**
@@ -22,10 +26,10 @@ public class ServerErrorHandler {
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status.
      */
-    @ExceptionHandler(value = {BadRequestException.class})
-    public ResponseEntity<Object> handleDataConflict(BadRequestException e) {
-        HttpStatus httpStatus = HttpStatus.CONFLICT;
-        log.error("Runtime exception occurred: " + e.getMessage(), e);
+    @ExceptionHandler(value = {ForbiddenException.class})
+    public ResponseEntity<Object> handleForbiddenException(ForbiddenException e) {
+        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+        log.error("Request with too small permissions occurred: %s".formatted(e.getMessage()), e);
         ExceptionData exceptionData = new ExceptionData(MESSAGE, httpStatus, clock.instant());
         return new ResponseEntity<>(exceptionData, httpStatus);
     }

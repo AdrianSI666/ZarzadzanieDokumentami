@@ -5,6 +5,7 @@ import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.service.DocumentService;
 import com.asledz.kancelaria_prawnicza.utilis.Converter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 /**
  * Controller for document class. Its functionality is to send and retrieve documents data for processing.
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(Path.DOCUMENT_VALUE + "s")

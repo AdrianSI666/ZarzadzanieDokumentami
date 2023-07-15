@@ -52,9 +52,9 @@ public class FileController {
      * @return ResponseEntity with note that everything went correct.
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> saveFile(@RequestParam("file") MultipartFile formData) {
-        fileService.addFile(formData);
+            produces = MediaType.APPLICATION_JSON_VALUE, path = "/{id}")
+    public ResponseEntity<String> saveFile(@PathVariable Long id, @RequestParam("file") MultipartFile formData) {
+        fileService.addFile(formData, id);
         //Without this line tomcat doesn't delete temp upload file if worked with Gotenberg service
         System.gc();
         return ResponseEntity.ok().body("Success");

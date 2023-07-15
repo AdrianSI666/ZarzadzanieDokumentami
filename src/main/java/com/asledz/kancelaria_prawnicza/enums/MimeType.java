@@ -1,4 +1,4 @@
-package com.asledz.kancelaria_prawnicza.utilis;
+package com.asledz.kancelaria_prawnicza.enums;
 
 import java.util.HashMap;
 import java.util.Map;

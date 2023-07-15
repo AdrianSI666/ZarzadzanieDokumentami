@@ -1,4 +1,4 @@
-package com.asledz.kancelaria_prawnicza.utilis;
+package com.asledz.kancelaria_prawnicza.search;
 
 import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
@@ -15,13 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.COST;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.DATE;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.PAID;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TEXT;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TITLE;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TYPE;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TYPE_ID;
+import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.*;
 import static com.asledz.kancelaria_prawnicza.enums.FilterAndSort.FILTER_TEXT;
 
 @Component
@@ -151,6 +145,19 @@ public class QueriesGenerator {
                     } else {
                         throw new BadRequestException("Couldn't use hibernate search on type id field: %s with given prompt: %s"
                                 .formatted(TYPE_ID.path, values.toString()));
+                    }
+                }
+                case FILTER_OWNER_ID -> {
+                    long id = Long.parseLong(values.get(0));
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, OWNER_ID.path, String.valueOf(values.get(0)))) {
+                        filterQueries.add(queryBuilder
+                                .keyword()
+                                .onField(OWNER_ID.path)
+                                .matching(id)
+                                .createQuery());
+                    } else {
+                        throw new BadRequestException("Couldn't use hibernate search on type id field: %s with given prompt: %s"
+                                .formatted(OWNER_ID.path, values.toString()));
                     }
                 }
                 case SORT_TITLE ->

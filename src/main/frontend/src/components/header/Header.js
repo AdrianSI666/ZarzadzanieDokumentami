@@ -2,8 +2,16 @@ import React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Header.css'
 import { Link } from 'react-router-dom';
+import inMemoryJWTMenager from "../../services/inMemoryJWTMenager";
 
 function Header(){
+    const isLoggedIn = inMemoryJWTMenager.getToken()!=null;
+    let button;
+    if (isLoggedIn) {      
+        button = <Link className="nav-link" to="/login" onClick={inMemoryJWTMenager.deleteToken()}>Logout</Link>;    
+    } 
+    else {      button = <Link className="nav-link" to="/login">Login</Link>;    
+    }
     return(
         <nav className="navbar navbar-expand-lg navbar-light, header">
             <div className="container-fluid">
@@ -16,9 +24,7 @@ function Header(){
                         <li className="nav-item">
                         <Link className="nav-link" to="/files">Files</Link>
                         </li>
-                        <li className="nav-item">
-                        <Link className="nav-link" to="/login">Login</Link>
-                        </li>
+                        {button}
                     </ul>
                 </div>
             </div>

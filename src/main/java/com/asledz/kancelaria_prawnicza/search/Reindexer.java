@@ -1,4 +1,4 @@
-package com.asledz.kancelaria_prawnicza.utilis;
+package com.asledz.kancelaria_prawnicza.search;
 
 import com.asledz.kancelaria_prawnicza.domain.File;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

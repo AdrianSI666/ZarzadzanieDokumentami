@@ -1,5 +1,6 @@
 package com.asledz.kancelaria_prawnicza.utilis;
 
+import com.asledz.kancelaria_prawnicza.enums.MimeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;

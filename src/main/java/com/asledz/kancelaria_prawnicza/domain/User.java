@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.*;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,10 +34,12 @@ public class User {
             nullable = false,
             updatable = false
     )
+    @Field(name = "ownerId", index = Index.YES, analyze = Analyze.NO, store = Store.NO)
     private Long id;
     private String name;
     private String surname;
     private String email;
+    private String password;
     @ManyToMany
     private Collection<Role> roles;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)

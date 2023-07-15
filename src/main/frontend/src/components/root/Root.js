@@ -1,10 +1,14 @@
-import React, {} from 'react';
+import React, {useState} from 'react';
 import './Root.css';
 import Header from '../header/Header';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Outlet } from 'react-router-dom';
 
 function Root() {
+  const [address] = useState({
+    localHost: "localhost",
+    port: "8091",
+  });
   return (
     <div className="container">
       <div className="row">
@@ -14,7 +18,7 @@ function Root() {
       </div>
       <div className='row'>
         <div className="Root">
-          <Outlet />
+          <Outlet context={[address]}/>
         </div>
       </div>
     </div>

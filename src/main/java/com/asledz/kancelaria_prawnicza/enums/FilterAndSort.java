@@ -12,6 +12,7 @@ public enum FilterAndSort {
     FILTER_COST_TO("filter_cost_to"),
     FILTER_PAID("filter_paid"),
     FILTER_TYPE_ID("filter_type_id"),
+    FILTER_OWNER_ID("filter_owner_id"),
     SORT_TITLE("sort_title"),
     SORT_DATE("sort_date"),
     SORT_COST("sort_cost"),

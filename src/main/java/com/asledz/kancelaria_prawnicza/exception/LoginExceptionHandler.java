@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Clock;
 
+/**
+ * Exception handler that handle exceptions when user trys to log in.
+ */
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
-public class ServerErrorHandler {
-    private static final String MESSAGE = "There was error on the server while processing your request. Try again later.";
+public class LoginExceptionHandler {
+    private static final String MESSAGE = "Failed to log in. Try again later.";
     private final Clock clock;
 
     /**
@@ -22,10 +25,10 @@ public class ServerErrorHandler {
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status.
      */
-    @ExceptionHandler(value = {BadRequestException.class})
-    public ResponseEntity<Object> handleDataConflict(BadRequestException e) {
-        HttpStatus httpStatus = HttpStatus.CONFLICT;
-        log.error("Runtime exception occurred: " + e.getMessage(), e);
+    @ExceptionHandler(value = {LoginException.class})
+    public ResponseEntity<Object> handleLoginException(LoginException e) {
+        HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
+        log.error("Failed to authenticate user with error message: %s".formatted(e.getMessage()), e);
         ExceptionData exceptionData = new ExceptionData(MESSAGE, httpStatus, clock.instant());
         return new ResponseEntity<>(exceptionData, httpStatus);
     }

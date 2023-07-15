@@ -1,19 +1,24 @@
 import axios from "axios";
 import { Button, Modal, Row, Col, Form, Table } from "react-bootstrap";
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useLocation  } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './Files.css';
+import './UserFiles.css';
 import React, { useState, useEffect, useCallback } from "react";
 import Dropzone from "../Dropzone";
 import { Pagination } from "@material-ui/lab";
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-
-const Files = () => {
-  const [address] = useOutletContext();
-  const localHost=address.localHost;
-  const port=address.port;
+import inMemoryJWTMenager from "../../services/inMemoryJWTMenager";
+import jwtDecode from "jwt-decode";
+const UserFiles = () => {
+  const [address] = useOutletContext()
+  const localHost=address.localHost
+  const port=address.port
+  const {state} = useLocation()
+  const { id } = state
+  
+  //const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,8 +47,7 @@ const Files = () => {
   const [costFilterTo, setCostFilterTo] = useState("");
   const [paidFilter, setPaidFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState(-1);
-  const [filterParams, setFilterParams] = useState({});
-
+  const [filterParams, setFilterParams] = useState({"filter_owner_id": id});
   const [sort1, setSort1] = useState(-1);
   const [sort1Desc, setSort1Desc] = useState(false);
   const [sort2, setSort2] = useState(-1);
@@ -60,7 +64,53 @@ const Files = () => {
   const [moreThan2Sort, setMoreThan2Sort] = useState(false)
   const [moreThan3Sort, setMoreThan3Sort] = useState(false)
   const [moreThan4Sort, setMoreThan4Sort] = useState(false)
+  axios.defaults.headers.common["Authorization"] = `Bearer ${inMemoryJWTMenager.getToken()}`;
 
+  axios.interceptors.request.use( async config => {
+    if(inMemoryJWTMenager.getToken() != null && inMemoryJWTMenager.getRefreshToken() != null){
+      let decodedToken = jwtDecode(inMemoryJWTMenager.getToken())
+      let dateNow = new Date().valueOf()/1000;
+      if(decodedToken.exp < dateNow){
+        const uninterceptedAxiosInstance = axios.create();
+        await uninterceptedAxiosInstance({
+          url: `http://${localHost}:${port}/token/refresh`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${inMemoryJWTMenager.getToken()}`,
+            Refresh: inMemoryJWTMenager.getRefreshToken()
+          }
+        }).then(res =>{
+          inMemoryJWTMenager.setToken(res.data.access_token)
+          config.headers.authorization = `Bearer ${res.data.access_token}`;
+          inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
+        }).catch(()=>{
+          setMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+          inMemoryJWTMenager.deleteToken()
+        })
+    }}
+    else if(inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() != null){
+      let decodedToken = jwtDecode(inMemoryJWTMenager.getRefreshToken())
+      let dateNow = new Date().valueOf()/1000;
+      if(decodedToken.exp > dateNow){
+        const uninterceptedAxiosInstance = axios.create();
+        await uninterceptedAxiosInstance({
+          url: `http://${localHost}:${port}/token/refresh`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${inMemoryJWTMenager.getRefreshToken()}`,
+            Refresh: inMemoryJWTMenager.getRefreshToken()
+          }
+        }).then(res =>{
+          inMemoryJWTMenager.setToken(res.data.access_token)
+          config.headers.authorization = `Bearer ${res.data.access_token}`;
+          inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
+        }).catch(()=>{
+          setMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+          inMemoryJWTMenager.deleteToken()
+        })
+    }}
+    return config;
+  });
 
   function getDocuments(page, pageSize, sortParams, filterParams) {
     if (Object.keys(filterParams).length !== 0) {
@@ -84,13 +134,15 @@ const Files = () => {
           axios.get(`http://${localHost}:${port}/types`)
             .then(res => {
               setTypesOfDocuments(res.data)
+            }).catch((err) => {
+              if(err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
             })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas filtrowania wyników z bazy danych.")
           setTimeout(function () {
             setMessage(undefined)
           }, 4000);
-        })
+    })
     } else {
       axios.get(`http://${localHost}:${port}/documents`, {
         params: {
@@ -106,6 +158,8 @@ const Files = () => {
           axios.get(`http://${localHost}:${port}/types`)
             .then(res => {
               setTypesOfDocuments(res.data)
+            }).catch((err) => {
+              if(err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
             })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas pobierania plików, spróbuj ponownie za chwilę.")
@@ -117,15 +171,15 @@ const Files = () => {
   }
 
   useEffect(() => {
-    getDocuments(page, pageSize, sortParams, filterParams)
-  }, [page]);
+      getDocuments(page, pageSize, sortParams, filterParams)
+    }, [page]);
 
   const onDrop = useCallback((acceptedFiles, page) => {
     Promise.all(acceptedFiles.map((file) => {
       const formData = new FormData();
       formData.append("file", file);
       axios.post(
-        `http://${localHost}:${port}/files`,
+        `http://${localHost}:${port}/files/${id}`,
         formData,
         {
           headers: {
@@ -150,7 +204,9 @@ const Files = () => {
     axios({
       url: `http://${localHost}:${port}/files/${id}`,
       method: "GET",
-      headers: "anything",
+      headers: {
+        "Authorization": `Bearer ${inMemoryJWTMenager.getToken()}`
+      },
       responseType: "blob"
     }).then(response => {
       if (typeof window.navigator.msSaveBlob !== 'undefined') {
@@ -167,6 +223,8 @@ const Files = () => {
         link.click();
         URL.revokeObjectURL(url)
       }
+    }).catch(() => {
+      setMessage("Błąd podczas pobierania pliku z serwera. Spróbuj ponownie później.")
     });
   }
 
@@ -198,6 +256,8 @@ const Files = () => {
           }
         })
         setFileInfos([...fileInfos])
+      }).catch(() => {
+        setMessage("Wystąpił błąd podczas zapisywania zmian na pliku: " + title)
       })
   }
 
@@ -209,6 +269,8 @@ const Files = () => {
     axios.post(`http://${localHost}:${port}/types`, fileDTO)
       .then((res) => {
         setTypesOfDocuments([...typesOfDocuments, res.data])
+      }).catch(() => {
+        setMessage("Wystąpił błąd podczas dodawania nowego typu.")
       })
   }
 
@@ -225,11 +287,11 @@ const Files = () => {
     }, 4000);
   }
 
-  function filterResultsBy() {
-    let filterParams = {};
+  function filterResultsBy(filterParams) {
+    let newFilterParams = {...filterParams};
     if (titleFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_title": titleFilter
       }
     }
@@ -240,50 +302,50 @@ const Files = () => {
       } else {
         range = [new Date(dateFromFilter)]
       }
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_date": range
       }
     }
     if (dateFromFilter == "" && dateBeforeFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_date_before": new Date(dateBeforeFilter)
       }
     }
     if (costFilterFrom != "") {
       const range = [costFilterFrom, costFilterTo]
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_cost": range
       }
     }
     if (costFilterFrom == "" && costFilterTo != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_cost_to": costFilterTo
       }
     }
     if (paidFilter != undefined) {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_paid": paidFilter
       }
     }
     if (typeFilter != -1) {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_type_id": typeFilter
       }
     }
     if (textFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "text": textFilter
       }
     }
-    setFilterParams(filterParams);
-    getDocuments(1, pageSize, sortParams, filterParams)
+    setFilterParams(newFilterParams);
+    getDocuments(1, pageSize, sortParams, newFilterParams)
   }
 
   function resetFilter() {
@@ -294,14 +356,14 @@ const Files = () => {
     setCostFilterTo("");
     setPaidFilter(null);
     setTypeFilter(-1);
+    let nullFilter = {"filter_owner_id": id}
     if(textFilter !== ""){
-      setFilterParams({
+      nullFilter = {
+        ...nullFilter,
         "text": textFilter
-      })
-    } else {
-      setFilterParams({});
-    }
-    getDocuments(1, pageSize, sortParams, filterParams);
+    }}
+    setFilterParams(nullFilter)
+    getDocuments(1, pageSize, sortParams, nullFilter);
   }
 
   const getSortValueFromId = (id) => {
@@ -542,7 +604,7 @@ const Files = () => {
               checked={paidFilter === false}
             />
             <Button onClick={() => setPaidFilter(null)}>
-              Wyczyść
+              Odznacz filter opłacenia
             </Button>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formTitleFilter">
@@ -554,8 +616,8 @@ const Files = () => {
               })}
             </Form.Select>
           </Form.Group>
-          <Button className="d-inline" variant="success" onClick={() => { filterResultsBy() }}>Filtruj</Button>
-          <Button className="ms-2 d-inline" onClick={() => { resetFilter() }}>Reset</Button>
+          <Button className="d-inline" variant="success" onClick={() => { filterResultsBy(filterParams) }}>Filtruj</Button>
+          <Button className="ms-2 d-inline" onClick={() => { resetFilter() }}>Reset filtrów</Button>
           <Divider />
           <h3>Sortowanie</h3>
           <div className="mb-3">
@@ -707,7 +769,7 @@ const Files = () => {
             </div>
           )}
           <Button className="d-inline" variant="success" onClick={() => sortResultsBy()}>Sortuj</Button>
-          <Button className="ms-2 d-inline" onClick={() => resetSort()}>Reset</Button>
+          <Button className="mt-2 d-inline" onClick={() => resetSort()}>Reset sortowania</Button>
         </List>
       </Drawer>
 
@@ -847,4 +909,4 @@ const Files = () => {
   );
 };
 
-export default Files;
+export default UserFiles;

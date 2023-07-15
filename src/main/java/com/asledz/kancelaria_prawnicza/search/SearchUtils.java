@@ -1,4 +1,4 @@
-package com.asledz.kancelaria_prawnicza.utilis;
+package com.asledz.kancelaria_prawnicza.search;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

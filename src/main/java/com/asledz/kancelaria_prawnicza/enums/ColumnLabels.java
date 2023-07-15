@@ -10,7 +10,8 @@ public enum ColumnLabels {
     COST("document.cost"),
     PAID("document.paid"),
     TYPE("document.type.name"),
-    TYPE_ID("document.type.typeId");
+    TYPE_ID("document.type.typeId"),
+    OWNER_ID("document.owner.ownerId");
 
     public final String path;
 

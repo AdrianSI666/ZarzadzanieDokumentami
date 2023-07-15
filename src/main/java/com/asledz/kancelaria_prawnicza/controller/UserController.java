@@ -1,5 +1,6 @@
 package com.asledz.kancelaria_prawnicza.controller;
 
+import com.asledz.kancelaria_prawnicza.dto.NewUserDTO;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.service.UserService;
@@ -38,11 +39,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping("/name/{name}")
-    public ResponseEntity<UserDTO> getUserByName(@PathVariable String name) {
-        return ResponseEntity.ok(userService.getUserByName(name));
-    }
-
     @GetMapping(Path.ROLE_VALUE + "/{id}")
     public ResponseEntity<Map<String, Object>> getUsersByRoleId(@PathVariable Long id, @RequestParam(defaultValue = "1") Integer page) {
         Page<UserDTO> userDTOPage = userService.getUsersByRole(id, page);
@@ -50,8 +46,8 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(userService.addUser(userDTO));
+    public ResponseEntity<UserDTO> addUser(@RequestBody NewUserDTO newUserDTO) {
+        return ResponseEntity.ok(userService.addUser(newUserDTO));
     }
 
     @PutMapping("/{id}")
