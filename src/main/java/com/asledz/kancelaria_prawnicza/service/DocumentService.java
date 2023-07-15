@@ -188,15 +188,10 @@ public class DocumentService {
         @SuppressWarnings("unchecked")
         List<File> files = fullTextQuery.getResultList();
         documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());
-        documentPage.get().forEach(document -> {
-            log.info("document id: %d".formatted(document.getId()));
-            log.info(document.toString());
-        });
         return documentPage.map(mapper::map);
     }
 
     public DocumentDTO updateDocument(DocumentDTO updatedDocumentInformation, Long documentId) {
-        log.info(updatedDocumentInformation.date().toString());
         log.info("Updating document with id: %d".formatted(documentId));
         Document oldDocument = documentRepository.findById(documentId).orElseThrow(
                 () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, documentId)));
