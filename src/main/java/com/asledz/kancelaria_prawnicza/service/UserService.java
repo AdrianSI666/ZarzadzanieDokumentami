@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,6 +27,10 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
+import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,11 +45,17 @@ public class UserService implements UserDetailsService {
 
     protected static final String USER_NOT_FOUND_MSG = "Couldn't find user with id: %d";
 
-    public Page<UserDTO> getUsers(Integer page) {
+    public Page<UserDTO> getUsers(Map<String, String> pageProperties) {
+        int page = 0;
+        if (pageProperties.containsKey(PAGE_NUMBER.name)) {
+            page = Integer.parseInt(pageProperties.get(PAGE_NUMBER.name)) - 1;
+        }
         log.info("Page %d of all users".formatted(page));
         int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize);
+        if (pageProperties.containsKey(PAGE_SIZE.name)) {
+            pageSize = Integer.parseInt(pageProperties.get(PAGE_SIZE.name));
+        }
+        Pageable paging = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
         Page<User> userPage = userRepository.findAll(paging);
         return userPage.map(mapper::map);
     }
@@ -103,7 +114,6 @@ public class UserService implements UserDetailsService {
                 () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         oldUser.setName(updatedUserInformation.name());
         oldUser.setSurname(updatedUserInformation.surname());
-        oldUser.setEmail(updatedUserInformation.email());
         return mapper.map(userRepository.save(oldUser));
     }
 

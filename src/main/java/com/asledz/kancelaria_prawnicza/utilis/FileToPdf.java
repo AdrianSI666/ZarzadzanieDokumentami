@@ -31,7 +31,7 @@ public class FileToPdf {
             post.setEntity(entity);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try(CloseableHttpClient client = HttpClients.createDefault()){
+            try (CloseableHttpClient client = HttpClients.createDefault()) {
                 HttpResponse response = client.execute(post);
                 response.getEntity().writeTo(out);
             }

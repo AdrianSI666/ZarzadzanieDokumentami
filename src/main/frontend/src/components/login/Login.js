@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import inMemoryJWTMenager from '../../services/inMemoryJWTMenager';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Form, Modal } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { loggInMannager, loggInUser } from '../redux/config';
+import jwtDecode from 'jwt-decode';
 
 const LoginProfile = () => {
-    const [address] = useOutletContext();
-    const localHost=address.localHost;
-    const port=address.port;
+    const config = useSelector((state) => state.config)
+    const dispatch = useDispatch();
+    const localHost=config.localHost;
+    const port=config.port;
+    
     const navigate = useNavigate();
       const [name, setName] = useState("");
       const [surname, setSurname] = useState("");
@@ -27,9 +31,14 @@ const LoginProfile = () => {
           }
           axios.post(`http://${localHost}:${port}/login`, authorities)
             .then((res) => {
+              dispatch(loggInUser(res.data.user_id))
+              if(jwtDecode(res.data.access_token).roles.includes("Manager"))
+              {
+                dispatch(loggInMannager(true))
+              }
               inMemoryJWTMenager.setToken(res.data.access_token)
               inMemoryJWTMenager.setRefreshToken(res.data.refresh_token);
-              navigate('/user/files', { state: { id: res.data.user_id } })
+              navigate('/user/files')
             })
             .catch(() => {
               setPassword("")

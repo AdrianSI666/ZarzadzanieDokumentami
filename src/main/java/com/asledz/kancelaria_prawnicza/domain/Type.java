@@ -23,6 +23,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Collection;
 
 @AllArgsConstructor
@@ -32,7 +33,7 @@ import java.util.Collection;
 @Getter
 @Entity(name = "type")
 @Table(name = "type", schema = "first")
-public class Type {
+public class Type implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(

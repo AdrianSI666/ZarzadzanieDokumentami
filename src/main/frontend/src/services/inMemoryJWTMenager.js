@@ -2,7 +2,6 @@ import secureLocalStorage from "react-secure-storage";
 
 const inMemoryJWTManager = () => {
     let inMemoryJWT = null;
- 
     const getToken = () => inMemoryJWT;
 
     const setToken = (token) => {

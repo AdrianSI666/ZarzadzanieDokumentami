@@ -18,10 +18,11 @@ public enum ColumnLabels {
     private static final Map<String, ColumnLabels> BY_LABEL = new HashMap<>();
 
     static {
-        for (ColumnLabels e: values()) {
+        for (ColumnLabels e : values()) {
             BY_LABEL.put(e.path, e);
         }
     }
+
     ColumnLabels(String contentType
     ) {
         this.path = contentType;

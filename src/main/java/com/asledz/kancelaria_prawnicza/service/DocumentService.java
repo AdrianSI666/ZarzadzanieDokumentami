@@ -3,17 +3,18 @@ package com.asledz.kancelaria_prawnicza.service;
 import com.asledz.kancelaria_prawnicza.domain.Document;
 import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.domain.Type;
+import com.asledz.kancelaria_prawnicza.dto.CountDocumentsByDay;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.DocumentRepository;
-import com.asledz.kancelaria_prawnicza.specification.CustomSpecification;
-import com.asledz.kancelaria_prawnicza.specification.SearchCriteria;
 import com.asledz.kancelaria_prawnicza.search.QueriesGenerator;
 import com.asledz.kancelaria_prawnicza.search.SearchUtils;
 import com.asledz.kancelaria_prawnicza.search.SortGenerator;
+import com.asledz.kancelaria_prawnicza.specification.CustomSpecification;
+import com.asledz.kancelaria_prawnicza.specification.SearchCriteria;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.Query;
@@ -23,12 +24,23 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +52,12 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 @Service
 @Transactional
 public class DocumentService {
+    @PersistenceContext
     private final EntityManager entityManager;
     private final DocumentRepository documentRepository;
     private final TypeService typeService;
     private final DTOMapper<Document, DocumentDTO> mapper;
     private final SearchUtils searchUtils;
-
     protected static final String DOCUMENT_NOT_FOUND_MSG = "Couldn't find document with id: %d";
 
 
@@ -53,11 +65,13 @@ public class DocumentService {
         int page = 0;
         if (pageProperties.containsKey(PAGE_NUMBER.name)) {
             page = Integer.parseInt(pageProperties.get(PAGE_NUMBER.name)) - 1;
+            pageProperties.remove(PAGE_NUMBER.name);
         }
         log.info("Page %d of all documents by Parameters".formatted(page));
         int pageSize = 5;
         if (pageProperties.containsKey(PAGE_SIZE.name)) {
             pageSize = Integer.parseInt(pageProperties.get(PAGE_SIZE.name));
+            pageProperties.remove(PAGE_SIZE.name);
         }
         Pageable paging;
         if (pageProperties.size() > 0) {
@@ -209,5 +223,32 @@ public class DocumentService {
     public void deleteDocument(Long documentId) {
         log.info("Deleting Document with id: %d".formatted(documentId));
         documentRepository.deleteById(documentId);
+    }
+
+    public List<CountDocumentsByDay> countDocumentsByDay(Long userId) {
+        log.info("Counting documents by date for user with id: {}", userId);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+        Root<Document> documentRoot = criteriaQuery.from(Document.class);
+        //Group By + Having, jeśli bez having to usunąć join i w group by zostawić tylko date
+        Join<Object, Object> productsJoin = documentRoot.join("owner");
+        criteriaQuery.groupBy(documentRoot.get("date"), productsJoin.get("id"));
+        criteriaQuery.having(criteriaBuilder.equal(productsJoin.get("id"), userId));
+
+        criteriaQuery.multiselect(documentRoot.get("date"), criteriaBuilder.count(documentRoot));
+        criteriaQuery.orderBy(criteriaBuilder.desc(documentRoot.get("date")));
+        TypedQuery<Object[]> typedQuery = entityManager.createQuery(criteriaQuery);
+        List<Object[]> resultList = typedQuery.getResultList();
+        entityManager.close();
+        return resultList.stream().map(result -> new CountDocumentsByDay((Instant) result[0], (Long) result[1])).toList();
+    }
+
+    public List<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId) {
+        log.info("Getting documents by ownerId: %d".formatted(userId));
+        CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("owner_id",
+                ":",
+                userId));
+        List<Document> documents = documentRepository.findAll(documentsByUserId);
+        return documents.stream().filter(document -> document.getDate() == null).map(mapper::map).toList();
     }
 }

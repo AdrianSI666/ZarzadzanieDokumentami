@@ -29,6 +29,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collection;
 
@@ -40,7 +41,7 @@ import java.util.Collection;
 @ToString
 @Entity(name = "document")
 @Table(name = "document", schema = "first")
-public class Document {
+public class Document implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(

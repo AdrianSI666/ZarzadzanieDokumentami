@@ -18,10 +18,11 @@ public enum MimeType {
     private static final Map<String, MimeType> BY_LABEL = new HashMap<>();
 
     static {
-        for (MimeType e: values()) {
+        for (MimeType e : values()) {
             BY_LABEL.put(e.contentType, e);
         }
     }
+
     MimeType(String contentType
     ) {
 

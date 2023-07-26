@@ -30,11 +30,12 @@ public class KancelariaPrawniczaApplication {
     CommandLineRunner runner(UserService userService,
                              RoleService roleService) {
         return args -> {
+            roleService.addRole(RoleDTO.builder().name("Manager").build());
             userService.addUser(NewUserDTO.builder()
-                            .name("test")
+                            .name("managerTest")
                             .surname("test")
-                            .email("test@test.pkp")
-                            .password("testPassword")
+                            .email("testM@test.pkp")
+                            .password("testMPassword")
                             .build());
         };
     }*/

@@ -1,5 +1,6 @@
 package com.asledz.kancelaria_prawnicza.mapper;
 
+import com.asledz.kancelaria_prawnicza.domain.Role;
 import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ public class UserDTOMapper implements DTOMapper<User, UserDTO> {
                 .name(source.getName())
                 .surname(source.getSurname())
                 .email(source.getEmail())
+                .roles(source.getRoles().stream().map(Role::getName).toList())
                 .build();
     }
 }

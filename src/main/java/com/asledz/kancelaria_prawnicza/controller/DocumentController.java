@@ -1,5 +1,6 @@
 package com.asledz.kancelaria_prawnicza.controller;
 
+import com.asledz.kancelaria_prawnicza.dto.CountDocumentsByDay;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
 import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.service.DocumentService;
@@ -9,8 +10,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -129,6 +138,16 @@ public class DocumentController {
     public ResponseEntity<String> deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);
         return ResponseEntity.ok().body("Success");
+    }
+
+    @GetMapping("/user/{id}/countByDate")
+    public ResponseEntity<List<CountDocumentsByDay>> getCountFromMonths(@PathVariable Long id) {
+        return ResponseEntity.ok().body(documentService.countDocumentsByDay(id));
+    }
+
+    @GetMapping("/user/{id}/withoutDate")
+    public ResponseEntity<List<DocumentDTO>> getDocumentsWithoutDate(@PathVariable Long id) {
+        return ResponseEntity.ok().body(documentService.getDocumentsByUserIdWithoutDate(id));
     }
 
 }

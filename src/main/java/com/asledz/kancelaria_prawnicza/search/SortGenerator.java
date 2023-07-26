@@ -22,7 +22,7 @@ public class SortGenerator {
             switch (SortEnum.valueOfSort(key)) {
                 case SORT_TITLE -> {
                     Sort sort = Sort.by("title");
-                    if ("true".equals(value))sort = sort.descending();
+                    if ("true".equals(value)) sort = sort.descending();
                     sortList.add(sort);
                 }
                 case SORT_DATE -> {
@@ -32,17 +32,17 @@ public class SortGenerator {
                 }
                 case SORT_COST -> {
                     Sort sort = Sort.by("cost");
-                    if ("true".equals(value))sort = sort.descending();
+                    if ("true".equals(value)) sort = sort.descending();
                     sortList.add(sort);
                 }
                 case SORT_PAID -> {
                     Sort sort = Sort.by("paid");
-                    if ("true".equals(value))sort = sort.descending();
+                    if ("true".equals(value)) sort = sort.descending();
                     sortList.add(sort);
                 }
                 case SORT_TYPE -> {
                     Sort sort = Sort.by("type.name");
-                    if ("true".equals(value))sort = sort.descending();
+                    if ("true".equals(value)) sort = sort.descending();
                     sortList.add(sort);
                 }
             }

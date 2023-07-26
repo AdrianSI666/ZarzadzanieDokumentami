@@ -10,7 +10,7 @@ public class DocumentDTOMapper implements DTOMapper<Document, DocumentDTO> {
     public DocumentDTO map(Document source) {
         String typeName;
         long typeId;
-        if(source.getType() == null){
+        if (source.getType() == null) {
             typeName = "brak typu";
             typeId = -1;
         } else {

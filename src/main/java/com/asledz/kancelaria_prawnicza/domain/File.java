@@ -22,6 +22,7 @@ import javax.persistence.Lob;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,7 +32,7 @@ import javax.persistence.Table;
 @Entity(name = "file")
 @Table(name = "file", schema = "first")
 @Indexed
-public class File {
+public class File implements Serializable {
     @Id
     @Column(name = "document_id")
     private Long id;

@@ -1,0 +1,50 @@
+body {
+    font: 1em sans-serif;
+}
+
+.fc-daygrid-event {
+    white-space: pre-wrap !important;
+    align-items: normal !important;
+    display: block !important;
+    padding-left: 15px !important;
+}
+
+.fc-daygrid-event-dot {
+    display: inline-flex;
+    position: absolute;
+    left: 0px;
+    top: 6px;
+}
+
+.fc-event-time,
+.fc-event-title {
+    display: inline;
+}
+
+.fc-daygrid-day {
+    overflow: hidden;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.box {
+    width: 12em;
+    word-break: break-all;
+    white-space: pre-wrap !important;
+}
+
+.MuiDrawer-paper {
+    width: 12% !important;
+}
+
+@media (max-width: 1200px) {
+    .MuiDrawer-paper {
+        width: 10% !important;
+    }
+}
+
+th .fc-day-sun, th .fc-day-sat {
+    background-color: #ffdf50;
+}

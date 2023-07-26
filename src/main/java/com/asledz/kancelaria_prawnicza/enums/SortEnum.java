@@ -14,10 +14,11 @@ public enum SortEnum {
     private static final Map<String, SortEnum> BY_LABEL = new HashMap<>();
 
     static {
-        for (SortEnum e: values()) {
+        for (SortEnum e : values()) {
             BY_LABEL.put(e.value, e);
         }
     }
+
     SortEnum(String contentType
     ) {
         this.value = contentType;

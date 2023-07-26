@@ -29,8 +29,8 @@ public class UserController {
     private final Converter converter;
 
     @GetMapping()
-    public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(defaultValue = "1") Integer page) {
-        Page<UserDTO> userDTOPage = userService.getUsers(page);
+    public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(defaultValue = ("page:1; maxSize:5")) Map<String, String> pageProperties) {
+        Page<UserDTO> userDTOPage = userService.getUsers(pageProperties);
         return ResponseEntity.ok().body(converter.convertDataFromPageToMap(userDTOPage));
     }
 

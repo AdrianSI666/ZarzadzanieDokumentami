@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Button, Modal, Row, Col, Form, Table } from "react-bootstrap";
-import { useOutletContext, useLocation  } from 'react-router-dom';
+import { Button, Modal, Row, Col, Form, Table, Alert } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserFiles.css';
 import React, { useState, useEffect, useCallback } from "react";
@@ -11,23 +10,25 @@ import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import inMemoryJWTMenager from "../../services/inMemoryJWTMenager";
 import jwtDecode from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { loggOfUser } from '../redux/config';
 const UserFiles = () => {
-  const [address] = useOutletContext()
-  const localHost=address.localHost
-  const port=address.port
-  const {state} = useLocation()
-  const { id } = state
-  
-  //const navigate = useNavigate();
+  const config = useSelector((state) => state.config)
+  const localHost = config.localHost
+  const port = config.port
+  const id = config.user
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
+  const [accessMessage, setAccessMessage] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-
+  const [filterDrawer, setFilterDrawer] = useState(false);
   const [fileInfos, setFileInfos] = useState([]);
   const [typesOfDocuments, setTypesOfDocuments] = useState([]);
   const [newTypeName, setNewTypeName] = useState("");
-
   const [fileId, setFileId] = useState(-1);
   const [title, setTitle] = useState("");
   const [cost, setCost] = useState(-1);
@@ -38,6 +39,7 @@ const UserFiles = () => {
   const [fileUploadModalShow, setFileUploadModalShow] = useState(false);
   const [fileEditModalShow, setFileEditModalShow] = useState(false);
   const [addNewTypeModalShow, setAddNewTypeModalShow] = useState(false);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false)
 
   const [textFilter, setTextFilter] = useState("");
   const [titleFilter, setTitleFilter] = useState("");
@@ -47,7 +49,7 @@ const UserFiles = () => {
   const [costFilterTo, setCostFilterTo] = useState("");
   const [paidFilter, setPaidFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState(-1);
-  const [filterParams, setFilterParams] = useState({"filter_owner_id": id});
+  const [filterParams, setFilterParams] = useState({ "filter_owner_id": id });
   const [sort1, setSort1] = useState(-1);
   const [sort1Desc, setSort1Desc] = useState(false);
   const [sort2, setSort2] = useState(-1);
@@ -66,11 +68,11 @@ const UserFiles = () => {
   const [moreThan4Sort, setMoreThan4Sort] = useState(false)
   axios.defaults.headers.common["Authorization"] = `Bearer ${inMemoryJWTMenager.getToken()}`;
 
-  axios.interceptors.request.use( async config => {
-    if(inMemoryJWTMenager.getToken() != null && inMemoryJWTMenager.getRefreshToken() != null){
+  axios.interceptors.request.use(async config => {
+    if (inMemoryJWTMenager.getToken() != null && inMemoryJWTMenager.getRefreshToken() != null) {
       let decodedToken = jwtDecode(inMemoryJWTMenager.getToken())
-      let dateNow = new Date().valueOf()/1000;
-      if(decodedToken.exp < dateNow){
+      let dateNow = new Date().valueOf() / 1000;
+      if (decodedToken.exp < dateNow) {
         const uninterceptedAxiosInstance = axios.create();
         await uninterceptedAxiosInstance({
           url: `http://${localHost}:${port}/token/refresh`,
@@ -79,19 +81,20 @@ const UserFiles = () => {
             Authorization: `Bearer ${inMemoryJWTMenager.getToken()}`,
             Refresh: inMemoryJWTMenager.getRefreshToken()
           }
-        }).then(res =>{
+        }).then(res => {
           inMemoryJWTMenager.setToken(res.data.access_token)
           config.headers.authorization = `Bearer ${res.data.access_token}`;
           inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
-        }).catch(()=>{
-          setMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+        }).catch(() => {
+          setAccessMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
           inMemoryJWTMenager.deleteToken()
+          dispatch(loggOfUser())
         })
-    }}
-    else if(inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() != null){
+      }
+    } else if (inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() != null) {
       let decodedToken = jwtDecode(inMemoryJWTMenager.getRefreshToken())
-      let dateNow = new Date().valueOf()/1000;
-      if(decodedToken.exp > dateNow){
+      let dateNow = new Date().valueOf() / 1000;
+      if (decodedToken.exp > dateNow) {
         const uninterceptedAxiosInstance = axios.create();
         await uninterceptedAxiosInstance({
           url: `http://${localHost}:${port}/token/refresh`,
@@ -100,23 +103,39 @@ const UserFiles = () => {
             Authorization: `Bearer ${inMemoryJWTMenager.getRefreshToken()}`,
             Refresh: inMemoryJWTMenager.getRefreshToken()
           }
-        }).then(res =>{
+        }).then(res => {
           inMemoryJWTMenager.setToken(res.data.access_token)
           config.headers.authorization = `Bearer ${res.data.access_token}`;
           inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
-        }).catch(()=>{
-          setMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+        }).catch(() => {
+          setAccessMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
           inMemoryJWTMenager.deleteToken()
+          dispatch(loggOfUser())
         })
-    }}
+      } else {
+        setAccessMessage("Sesja wygasła, zaloguj się ponownie")
+        inMemoryJWTMenager.deleteToken()
+        dispatch(loggOfUser())
+      }
+    } else if (inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() == null) {
+      inMemoryJWTMenager.deleteToken()
+      dispatch(loggOfUser())
+      navigate("/login")
+    }
     return config;
   });
+
+  const toggleFilterDrawer = (e, open) => {
+    e.preventDefault()
+
+    setFilterDrawer(open);
+  };
 
   function getDocuments(page, pageSize, sortParams, filterParams) {
     if (Object.keys(filterParams).length !== 0) {
       let params = {
         page,
-        pageSize,
+        'page_size': pageSize,
         ...filterParams,
         ...sortParams
       }
@@ -131,23 +150,17 @@ const UserFiles = () => {
           setFileInfos(res.data.data)
           setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
-          axios.get(`http://${localHost}:${port}/types`)
-            .then(res => {
-              setTypesOfDocuments(res.data)
-            }).catch((err) => {
-              if(err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
-            })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas filtrowania wyników z bazy danych.")
           setTimeout(function () {
             setMessage(undefined)
           }, 4000);
-    })
+        })
     } else {
       axios.get(`http://${localHost}:${port}/documents`, {
         params: {
           page: page,
-          pageSize: pageSize,
+          'page_size': pageSize,
           ...sortParams
         }
       })
@@ -155,12 +168,6 @@ const UserFiles = () => {
           setFileInfos(res.data.data)
           setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
-          axios.get(`http://${localHost}:${port}/types`)
-            .then(res => {
-              setTypesOfDocuments(res.data)
-            }).catch((err) => {
-              if(err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
-            })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas pobierania plików, spróbuj ponownie za chwilę.")
           setTimeout(function () {
@@ -169,10 +176,18 @@ const UserFiles = () => {
         });
     }
   }
+  useEffect(() => {
+    axios.get(`http://${localHost}:${port}/types`)
+      .then(res => {
+        setTypesOfDocuments(res.data)
+      }).catch((err) => {
+        if (err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
+      })
+  }, [])
 
   useEffect(() => {
-      getDocuments(page, pageSize, sortParams, filterParams)
-    }, [page]);
+    getDocuments(page, pageSize, sortParams, filterParams)
+  }, [page]);
 
   const onDrop = useCallback((acceptedFiles, page) => {
     Promise.all(acceptedFiles.map((file) => {
@@ -257,7 +272,7 @@ const UserFiles = () => {
         })
         setFileInfos([...fileInfos])
       }).catch(() => {
-        setMessage("Wystąpił błąd podczas zapisywania zmian na pliku: " + title)
+        setMessage("Wystąpił błąd podczas zapisywania zmian w dokumencie: " + title)
       })
   }
 
@@ -288,12 +303,14 @@ const UserFiles = () => {
   }
 
   function filterResultsBy(filterParams) {
-    let newFilterParams = {...filterParams};
+    let newFilterParams = { ...filterParams };
     if (titleFilter != "") {
       newFilterParams = {
         ...newFilterParams,
         "filter_title": titleFilter
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_title")) delete newFilterParams["filter_title"]
     }
     if (dateFromFilter != "") {
       let range = []
@@ -306,12 +323,16 @@ const UserFiles = () => {
         ...newFilterParams,
         "filter_date": range
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_date")) delete newFilterParams["filter_date"]
     }
     if (dateFromFilter == "" && dateBeforeFilter != "") {
       newFilterParams = {
         ...newFilterParams,
         "filter_date_before": new Date(dateBeforeFilter)
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_date_before")) delete newFilterParams["filter_date_before"]
     }
     if (costFilterFrom != "") {
       const range = [costFilterFrom, costFilterTo]
@@ -319,30 +340,40 @@ const UserFiles = () => {
         ...newFilterParams,
         "filter_cost": range
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_cost")) delete newFilterParams["filter_cost"]
     }
     if (costFilterFrom == "" && costFilterTo != "") {
       newFilterParams = {
         ...newFilterParams,
         "filter_cost_to": costFilterTo
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_cost_to")) delete newFilterParams["filter_cost_to"]
     }
     if (paidFilter != undefined) {
       newFilterParams = {
         ...newFilterParams,
         "filter_paid": paidFilter
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_paid")) delete newFilterParams["filter_paid"]
     }
     if (typeFilter != -1) {
       newFilterParams = {
         ...newFilterParams,
         "filter_type_id": typeFilter
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "filter_type_id")) delete newFilterParams["filter_type_id"]
     }
     if (textFilter != "") {
       newFilterParams = {
         ...newFilterParams,
         "text": textFilter
       }
+    } else {
+      if (Object.prototype.hasOwnProperty.call(newFilterParams, "text")) delete newFilterParams["text"]
     }
     setFilterParams(newFilterParams);
     getDocuments(1, pageSize, sortParams, newFilterParams)
@@ -356,12 +387,13 @@ const UserFiles = () => {
     setCostFilterTo("");
     setPaidFilter(null);
     setTypeFilter(-1);
-    let nullFilter = {"filter_owner_id": id}
-    if(textFilter !== ""){
+    let nullFilter = { "filter_owner_id": id }
+    if (textFilter !== "") {
       nullFilter = {
         ...nullFilter,
         "text": textFilter
-    }}
+      }
+    }
     setFilterParams(nullFilter)
     getDocuments(1, pageSize, sortParams, nullFilter);
   }
@@ -417,12 +449,16 @@ const UserFiles = () => {
   return (
     <div>
       <Button variant='success' onClick={() => { setFileUploadModalShow(true); }}>
-        Dodaj plik
+        Dodaj plik/i
       </Button>
 
-      {message && (<div className="alert alert-light" role="alert">
+      {accessMessage && (<Alert key={"danger"} variant={"danger"}>
+        {accessMessage}
+      </Alert>
+      )}
+      {message && (<Alert key={"warning"} variant={"warning"}>
         {message}
-      </div>
+      </Alert>
       )}
       <div className="card">
         <Row>
@@ -461,11 +497,17 @@ const UserFiles = () => {
             }}>
               Reset wyszukiwania po tekście
             </Button>
+            <Button className='me-1' variant='success' onClick={(e) => {
+              toggleFilterDrawer(e, true)
+            }}>
+              Więcej opcji
+            </Button>
             <Button variant='primary' className='me-1' onClick={() => {
               setTextFilter("")
               resetFilter()
               resetSort()
-              getDocuments(1, pageSize, {}, {})
+              let nullFilter = { "filter_owner_id": id }
+              getDocuments(1, pageSize, {}, nullFilter)
             }}>
               Reset wyszukiwania i sortowania
             </Button>
@@ -528,7 +570,13 @@ const UserFiles = () => {
                   </Button>
                 </td>
                 <td>
-                  <Button variant="danger" onClick={(e) => { deleteFile(e, file.id); }}>
+                  <Button variant="danger" onClick={() => {
+                    {
+                      setFileId(file.id)
+                      setTitle(file.title)
+                      setDeleteConfirmModal(true);
+                    }
+                  }}>
                     Usuń
                   </Button>
                 </td>
@@ -553,19 +601,13 @@ const UserFiles = () => {
         />
       </div>
       <Drawer
-        sx={{
-          width: 224,
-          '& .MuiDrawer-paper': {
-            width: 224,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="permanent"
+        open={filterDrawer}
+        onClose={e => toggleFilterDrawer(e, false)}
         anchor="right"
       >
-        <h3>Filtry</h3>
+        <h3 className="text-center">Filtry</h3>
         <Divider />
-        <List>
+        <List className="ms-2 text-center">
           <Form.Group className="mb-3" controlId="formTitleFilter">
             <Form.Label>Tytuł</Form.Label>
             <Form.Control value={titleFilter} type="text" onChange={e => setTitleFilter(e.target.value)} />
@@ -643,7 +685,7 @@ const UserFiles = () => {
               <Button onClick={() => { setMoreThan1Sort(true) }}>
                 Dodaj drugi parametr
               </Button>)}
-            {moreThan1Sort && (<Button onClick={() => {
+            {moreThan1Sort && (<Button variant="danger" onClick={() => {
               setMoreThan1Sort(false)
               setMoreThan2Sort(false)
               setMoreThan3Sort(false)
@@ -676,7 +718,7 @@ const UserFiles = () => {
                 <Button onClick={() => { setMoreThan2Sort(true) }}>
                   Dodaj trzeci parametr
                 </Button>)}
-              {moreThan2Sort && (<Button onClick={() => {
+              {moreThan2Sort && (<Button variant="danger" onClick={() => {
                 setMoreThan2Sort(false)
                 setMoreThan3Sort(false)
                 setMoreThan4Sort(false)
@@ -709,7 +751,7 @@ const UserFiles = () => {
                 <Button onClick={() => { setMoreThan3Sort(true) }}>
                   Dodaj czwarty parametr
                 </Button>)}
-              {moreThan3Sort && (<Button onClick={() => {
+              {moreThan3Sort && (<Button variant="danger" onClick={() => {
                 setMoreThan3Sort(false)
                 setMoreThan4Sort(false)
               }}>
@@ -741,7 +783,7 @@ const UserFiles = () => {
                 <Button onClick={() => { setMoreThan4Sort(true) }}>
                   Dodaj piąty parametr
                 </Button>)}
-              {moreThan4Sort && (<Button onClick={() => { setMoreThan4Sort(false) }}>
+              {moreThan4Sort && (<Button variant="danger" onClick={() => { setMoreThan4Sort(false) }}>
                 Usuń piąty parametr
               </Button>)}
             </div>
@@ -829,7 +871,7 @@ const UserFiles = () => {
                   return <option value={types.id} key={types.id}>{types.name}</option>
                 })}
               </Form.Select>
-              <Button variant="primary" onClick={e => {
+              <Button variant="success" onClick={e => {
                 e.preventDefault()
                 setAddNewTypeModalShow(true)
               }}>
@@ -863,7 +905,7 @@ const UserFiles = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={(e) => {
+          <Button variant="danger" onClick={(e) => {
             e.preventDefault()
             setFileEditModalShow(false)
             setFileId(-1)
@@ -897,7 +939,7 @@ const UserFiles = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={(e) => {
+          <Button variant="danger" onClick={(e) => {
             e.preventDefault()
             setAddNewTypeModalShow(false)
           }
@@ -905,6 +947,43 @@ const UserFiles = () => {
         </Modal.Footer>
       </Modal>
 
+      <Modal
+        show={deleteConfirmModal}
+        onHide={() => setDeleteConfirmModal(false)}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered>
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Potwierdzenie usunięcia
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={(e) => {
+            deleteFile(e, fileId);
+            setDeleteConfirmModal(false);
+          }}>
+            <Form.Group className="mb-3" controlId="formTitle">
+              <Form.Label>Czy napewno chcesz usunąć dany dokument z nazwą: {title}</Form.Label>
+              <Button className='ms-5' variant="danger" type="submit">
+                Usuń
+              </Button>
+              <Button className='ms-5' variant="primary" onClick={(e) => {
+                e.preventDefault()
+                setDeleteConfirmModal(false)
+              }
+              }>Cofnij</Button>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={(e) => {
+            e.preventDefault()
+            setDeleteConfirmModal(false)
+          }
+          }>Zamknij</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

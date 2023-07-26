@@ -23,9 +23,9 @@ public class Zipper {
 
     public static byte[] decompress(byte[] bytes) throws IOException {
         byte[] decompressedBytes;
-        try(ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        InflaterInputStream inflaterInputStream = new InflaterInputStream(byteArrayInputStream);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()){
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+             InflaterInputStream inflaterInputStream = new InflaterInputStream(byteArrayInputStream);
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             int read;
             while ((read = inflaterInputStream.read()) != -1) {
                 byteArrayOutputStream.write(read);

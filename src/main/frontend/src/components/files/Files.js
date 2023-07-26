@@ -1,38 +1,32 @@
 import axios from "axios";
-import { Button, Modal, Row, Col, Form, Table } from "react-bootstrap";
-import { useOutletContext } from 'react-router-dom';
+import { Button, Row, Col, Form, Table, Alert } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Files.css';
-import React, { useState, useEffect, useCallback } from "react";
-import Dropzone from "../Dropzone";
+import React, { useState, useEffect } from "react";
 import { Pagination } from "@material-ui/lab";
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-
+import inMemoryJWTMenager from "../../services/inMemoryJWTMenager";
+import jwtDecode from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
+import { loggOfUser } from "../redux/config";
+import { useNavigate } from "react-router-dom";
 const Files = () => {
-  const [address] = useOutletContext();
-  const localHost=address.localHost;
-  const port=address.port;
+  const config = useSelector((state) => state.config)
+  const localHost=config.localHost
+  const port=config.port
+  const dispatch = useDispatch();
+  
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
+  const [accessMessage, setAccessMessage] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
   const [fileInfos, setFileInfos] = useState([]);
   const [typesOfDocuments, setTypesOfDocuments] = useState([]);
-  const [newTypeName, setNewTypeName] = useState("");
-
-  const [fileId, setFileId] = useState(-1);
-  const [title, setTitle] = useState("");
-  const [cost, setCost] = useState(-1);
-  const [paid, setPaid] = useState(false);
-  const [dateToPay, setDateToPay] = useState(new Date());
-  const [idOfTypeOfDocument, setIdOfTypeOfDocument] = useState("");
-
-  const [fileUploadModalShow, setFileUploadModalShow] = useState(false);
-  const [fileEditModalShow, setFileEditModalShow] = useState(false);
-  const [addNewTypeModalShow, setAddNewTypeModalShow] = useState(false);
 
   const [textFilter, setTextFilter] = useState("");
   const [titleFilter, setTitleFilter] = useState("");
@@ -43,7 +37,6 @@ const Files = () => {
   const [paidFilter, setPaidFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState(-1);
   const [filterParams, setFilterParams] = useState({});
-
   const [sort1, setSort1] = useState(-1);
   const [sort1Desc, setSort1Desc] = useState(false);
   const [sort2, setSort2] = useState(-1);
@@ -60,13 +53,67 @@ const Files = () => {
   const [moreThan2Sort, setMoreThan2Sort] = useState(false)
   const [moreThan3Sort, setMoreThan3Sort] = useState(false)
   const [moreThan4Sort, setMoreThan4Sort] = useState(false)
+  axios.defaults.headers.common["Authorization"] = `Bearer ${inMemoryJWTMenager.getToken()}`;
 
+  axios.interceptors.request.use( async config => {
+    if(inMemoryJWTMenager.getToken() != null && inMemoryJWTMenager.getRefreshToken() != null){
+        let decodedToken = jwtDecode(inMemoryJWTMenager.getToken())
+        let dateNow = new Date().valueOf()/1000;
+        if(decodedToken.exp < dateNow){
+          const uninterceptedAxiosInstance = axios.create();
+          await uninterceptedAxiosInstance({
+            url: `http://${localHost}:${port}/token/refresh`,
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${inMemoryJWTMenager.getToken()}`,
+              Refresh: inMemoryJWTMenager.getRefreshToken()
+            }
+          }).then(res =>{
+            inMemoryJWTMenager.setToken(res.data.access_token)
+            config.headers.authorization = `Bearer ${res.data.access_token}`;
+            inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
+          }).catch(()=>{
+            setAccessMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+            inMemoryJWTMenager.deleteToken()
+            dispatch(loggOfUser())
+          }) 
+        }
+        }else if(inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() != null){
+          let decodedToken = jwtDecode(inMemoryJWTMenager.getRefreshToken())
+          let dateNow = new Date().valueOf()/1000;
+          if(decodedToken.exp > dateNow){
+            const uninterceptedAxiosInstance = axios.create();
+            await uninterceptedAxiosInstance({
+              url: `http://${localHost}:${port}/token/refresh`,
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${inMemoryJWTMenager.getRefreshToken()}`,
+                Refresh: inMemoryJWTMenager.getRefreshToken()
+              }
+            }).then(res =>{
+              inMemoryJWTMenager.setToken(res.data.access_token)
+              config.headers.authorization = `Bearer ${res.data.access_token}`;
+              inMemoryJWTMenager.setRefreshToken(res.data.refresh_token)
+            }).catch(()=>{
+              setAccessMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+              inMemoryJWTMenager.deleteToken()
+              dispatch(loggOfUser())
+            }) 
+        }
+    } else if(inMemoryJWTMenager.getToken() == null && inMemoryJWTMenager.getRefreshToken() == null){
+      setAccessMessage("Nie można potwierdzić twojej tożsamości. Zaloguj się ponownie.")
+      inMemoryJWTMenager.deleteToken()
+      dispatch(loggOfUser())
+      navigate("/login")
+    }
+    return config;
+    });
 
   function getDocuments(page, pageSize, sortParams, filterParams) {
     if (Object.keys(filterParams).length !== 0) {
       let params = {
         page,
-        pageSize,
+        "page_size": pageSize,
         ...filterParams,
         ...sortParams
       }
@@ -81,21 +128,17 @@ const Files = () => {
           setFileInfos(res.data.data)
           setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
-          axios.get(`http://${localHost}:${port}/types`)
-            .then(res => {
-              setTypesOfDocuments(res.data)
-            })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas filtrowania wyników z bazy danych.")
           setTimeout(function () {
             setMessage(undefined)
           }, 4000);
-        })
+    })
     } else {
       axios.get(`http://${localHost}:${port}/documents`, {
         params: {
           page: page,
-          pageSize: pageSize,
+          'page_size': pageSize,
           ...sortParams
         }
       })
@@ -103,10 +146,6 @@ const Files = () => {
           setFileInfos(res.data.data)
           setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
-          axios.get(`http://${localHost}:${port}/types`)
-            .then(res => {
-              setTypesOfDocuments(res.data)
-            })
         }).catch(() => {
           setMessage("Wystąpił błąd podczas pobierania plików, spróbuj ponownie za chwilę.")
           setTimeout(function () {
@@ -115,42 +154,28 @@ const Files = () => {
         });
     }
   }
+  useEffect(() =>{
+    axios.get(`http://${localHost}:${port}/types`)
+            .then(res => {
+              setTypesOfDocuments(res.data)
+            }).catch((err) => {
+              if(err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
+            })
+  }, [])
 
   useEffect(() => {
-    getDocuments(page, pageSize, sortParams, filterParams)
-  }, [page]);
+      getDocuments(page, pageSize, sortParams, filterParams)
+    }, [page]);
 
-  const onDrop = useCallback((acceptedFiles, page) => {
-    Promise.all(acceptedFiles.map((file) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      axios.post(
-        `http://${localHost}:${port}/files`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "charset": "utf-8"
-          }
-        }).then(() => {
-          setMessage("Plik pomyślnie dodany do bazy oraz zresetowano wyszukiwanie.")
-          getDocuments(page, pageSize, sortParams, filterParams)
-        }).catch(() => {
-          setMessage("Wystąpił błąd podczas wysyłania pliku do bazy")
-        })
-    }))
-    setMessage("Plik jest wysyłany na serwer.")
-    setTimeout(function () {
-      setMessage(undefined)
-    }, 4000);
-  }, [])
 
   function download(e, id, name) {
     e.preventDefault()
     axios({
       url: `http://${localHost}:${port}/files/${id}`,
       method: "GET",
-      headers: "anything",
+      headers: {
+        "Authorization": `Bearer ${inMemoryJWTMenager.getToken()}`
+      },
       responseType: "blob"
     }).then(response => {
       if (typeof window.navigator.msSaveBlob !== 'undefined') {
@@ -167,69 +192,16 @@ const Files = () => {
         link.click();
         URL.revokeObjectURL(url)
       }
+    }).catch(() => {
+      setMessage("Błąd podczas pobierania pliku z serwera. Spróbuj ponownie później.")
     });
   }
 
-  function editDocument(e, fileId, title, idOfType, dateToPay, cost, paid) {
-    e.preventDefault()
-    if (cost == "" || cost == null) {
-      paid = null
-    } else if (paid == null) {
-      paid = false
-    }
-    const documentDTO = {
-      "title": title,
-      "date": new Date(dateToPay),
-      "cost": cost,
-      "paid": paid,
-      "typeId": idOfType
-    }
-    axios.put(`http://${localHost}:${port}/documents/${fileId}`, documentDTO)
-      .then((res) => {
-        const changedDocument = res.data
-        fileInfos.forEach(file => {
-          if (file.id === fileId) {
-            file.title = changedDocument.title
-            file.date = changedDocument.date
-            file.cost = changedDocument.cost
-            file.paid = changedDocument.paid
-            file.typeId = changedDocument.typeId
-            file.typeName = changedDocument.typeName
-          }
-        })
-        setFileInfos([...fileInfos])
-      })
-  }
-
-  function addNewType(e, typeName) {
-    e.preventDefault()
-    const fileDTO = {
-      "name": typeName
-    }
-    axios.post(`http://${localHost}:${port}/types`, fileDTO)
-      .then((res) => {
-        setTypesOfDocuments([...typesOfDocuments, res.data])
-      })
-  }
-
-  function deleteFile(e, id) {
-    e.preventDefault()
-    axios.delete(`http://${localHost}:${port}/documents/${id}`).then(() => {
-      setMessage("Pomyślnie usunięto plik")
-      getDocuments(page, pageSize, sortParams, filterParams)
-    }).catch(() => {
-      setMessage("Wystąpił błąd podczas usuwania pliku")
-    })
-    setTimeout(function () {
-      setMessage(undefined)
-    }, 4000);
-  }
-
   function filterResultsBy() {
-    let filterParams = {};
+    let newFilterParams = {};
     if (titleFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_title": titleFilter
       }
     }
@@ -240,50 +212,50 @@ const Files = () => {
       } else {
         range = [new Date(dateFromFilter)]
       }
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_date": range
       }
     }
     if (dateFromFilter == "" && dateBeforeFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_date_before": new Date(dateBeforeFilter)
       }
     }
     if (costFilterFrom != "") {
       const range = [costFilterFrom, costFilterTo]
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_cost": range
       }
     }
     if (costFilterFrom == "" && costFilterTo != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_cost_to": costFilterTo
       }
     }
     if (paidFilter != undefined) {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_paid": paidFilter
       }
     }
     if (typeFilter != -1) {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "filter_type_id": typeFilter
       }
     }
     if (textFilter != "") {
-      filterParams = {
-        ...filterParams,
+      newFilterParams = {
+        ...newFilterParams,
         "text": textFilter
       }
     }
-    setFilterParams(filterParams);
-    getDocuments(1, pageSize, sortParams, filterParams)
+    setFilterParams(newFilterParams);
+    getDocuments(1, pageSize, sortParams, newFilterParams)
   }
 
   function resetFilter() {
@@ -294,14 +266,13 @@ const Files = () => {
     setCostFilterTo("");
     setPaidFilter(null);
     setTypeFilter(-1);
+    let nullFilter = {}
     if(textFilter !== ""){
-      setFilterParams({
+      nullFilter = {
         "text": textFilter
-      })
-    } else {
-      setFilterParams({});
-    }
-    getDocuments(1, pageSize, sortParams, filterParams);
+    }}
+    setFilterParams(nullFilter)
+    getDocuments(1, pageSize, sortParams, nullFilter);
   }
 
   const getSortValueFromId = (id) => {
@@ -354,13 +325,13 @@ const Files = () => {
 
   return (
     <div>
-      <Button variant='success' onClick={() => { setFileUploadModalShow(true); }}>
-        Dodaj plik
-      </Button>
-
-      {message && (<div className="alert alert-light" role="alert">
+      {accessMessage && (<Alert key={"danger"} variant={"danger"}>
+        {accessMessage}
+      </Alert>
+      )}
+      {message && (<Alert key={"warning"} variant={"warning"}>
         {message}
-      </div>
+      </Alert>
       )}
       <div className="card">
         <Row>
@@ -435,7 +406,7 @@ const Files = () => {
               <th className="th-ss">Do zapłaty</th>
               <th className="th-ss">Opłacony</th>
               <th className="th-ms">Typ dokumentu</th>
-              <th colSpan={3}>Akcje</th>
+              <th colSpan={1}>Akcje</th>
             </tr>
           </thead>
           <tbody>
@@ -450,24 +421,6 @@ const Files = () => {
                 <td>
                   <Button variant='primary' onClick={(e) => { download(e, file.id, file.title); }}>
                     Pobierz
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="success" onClick={() => {
-                    setFileId(file.id)
-                    setTitle(file.title)
-                    setDateToPay(file.date)
-                    setCost(file.cost)
-                    setPaid(file.paid)
-                    setIdOfTypeOfDocument(file.typeId)
-                    setFileEditModalShow(true)
-                  }}>
-                    Edytuj
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="danger" onClick={(e) => { deleteFile(e, file.id); }}>
-                    Usuń
                   </Button>
                 </td>
               </tr>
@@ -542,7 +495,7 @@ const Files = () => {
               checked={paidFilter === false}
             />
             <Button onClick={() => setPaidFilter(null)}>
-              Wyczyść
+              Odznacz filter opłacenia
             </Button>
           </Form.Group>
           <Form.Group className="mb-3" controlId="formTitleFilter">
@@ -555,7 +508,7 @@ const Files = () => {
             </Form.Select>
           </Form.Group>
           <Button className="d-inline" variant="success" onClick={() => { filterResultsBy() }}>Filtruj</Button>
-          <Button className="ms-2 d-inline" onClick={() => { resetFilter() }}>Reset</Button>
+          <Button className="ms-2 d-inline" onClick={() => { resetFilter() }}>Reset filtrów</Button>
           <Divider />
           <h3>Sortowanie</h3>
           <div className="mb-3">
@@ -707,141 +660,9 @@ const Files = () => {
             </div>
           )}
           <Button className="d-inline" variant="success" onClick={() => sortResultsBy()}>Sortuj</Button>
-          <Button className="ms-2 d-inline" onClick={() => resetSort()}>Reset</Button>
+          <Button className="mt-2 d-inline" onClick={() => resetSort()}>Reset sortowania</Button>
         </List>
       </Drawer>
-
-      <Modal
-        show={fileUploadModalShow}
-        onHide={() => setFileUploadModalShow(false)}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Dodanie pliku
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Dropzone onDrop={(acceptedFiles) => {
-            onDrop(acceptedFiles, page)
-            setFileUploadModalShow(false)
-          }} />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={() => setFileUploadModalShow(false)}>Zamknij</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal
-        show={fileEditModalShow}
-        onHide={() => {
-          setFileEditModalShow(false)
-          setFileId(-1)
-        }}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Edycja informacji o dokumencie
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={(e) => {
-            editDocument(e, fileId, title, idOfTypeOfDocument, dateToPay, cost, paid);
-            setFileEditModalShow(false);
-          }}>
-            <Form.Group className="mb-3" controlId="formTitle">
-              <Form.Label>Tytuł</Form.Label>
-              <Form.Control value={title} type="text" onChange={e => setTitle(e.target.value)} />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formTitle">
-              <Form.Label>Typ</Form.Label>
-              <Form.Select value={idOfTypeOfDocument} onChange={e => setIdOfTypeOfDocument(e.target.value)}>
-                <option value="-1" disabled>Wybierz typ</option>
-                {typesOfDocuments.map((types) => {
-                  return <option value={types.id} key={types.id}>{types.name}</option>
-                })}
-              </Form.Select>
-              <Button variant="primary" onClick={e => {
-                e.preventDefault()
-                setAddNewTypeModalShow(true)
-              }}>
-                Dodaj nowy typ dokumentu
-              </Button>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formDate">
-              <Form.Label>Data do zapłaty</Form.Label>
-              <Form.Control value={dateToPay != null ? new Date(dateToPay).toISOString().substring(0, 10) : new Date()} type="date" onChange={e => setDateToPay(e.target.value)} />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formCost">
-              <Form.Label>Koszt zapłaty</Form.Label>
-              <Form.Control value={cost != null ? cost : ""} type="number" onChange={e => setCost(e.target.value)} />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formPaid">
-              <Form.Check
-                type={'checkbox'}
-                id={`paid`}
-                label={`Opłacony`}
-                defaultChecked={paid}
-                onChange={e => setPaid(e.target.checked)}
-              />
-            </Form.Group>
-
-            <Button variant="primary" type="submit">
-              Zmień
-            </Button>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={(e) => {
-            e.preventDefault()
-            setFileEditModalShow(false)
-            setFileId(-1)
-          }}>Zamknij</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal
-        show={addNewTypeModalShow}
-        onHide={() => setAddNewTypeModalShow(false)}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered>
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Dodanie nowego typu
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={(e) => {
-            addNewType(e, newTypeName);
-            setAddNewTypeModalShow(false);
-          }}>
-            <Form.Group className="mb-3" controlId="formTitle">
-              <Form.Label>Nazwa typu</Form.Label>
-              <Form.Control value={newTypeName} type="text" onChange={e => setNewTypeName(e.target.value)} />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Dodaj nowy typ
-            </Button>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={(e) => {
-            e.preventDefault()
-            setAddNewTypeModalShow(false)
-          }
-          }>Zamknij</Button>
-        </Modal.Footer>
-      </Modal>
 
     </div>
   );

@@ -27,6 +27,7 @@ public class TypeService {
 
     /**
      * Function to get all known types of Documents
+     *
      * @return all types that exists in database
      */
     public List<TypeDTO> getTypes() {
@@ -36,6 +37,7 @@ public class TypeService {
 
     /**
      * Function to get type by id
+     *
      * @return type with given id, or throws NotFoundException
      */
     public Type getTypeById(Long typeId) {
@@ -46,6 +48,7 @@ public class TypeService {
 
     /**
      * Function to add new type of Document
+     *
      * @param newTypeInformation - contains name of new type
      * @return type with given id from database and name
      */
@@ -59,8 +62,9 @@ public class TypeService {
 
     /**
      * Function to update existing type
+     *
      * @param updatedTypeInformation - contains changed name of type
-     * @param typeId - id of type that you want to change
+     * @param typeId                 - id of type that you want to change
      * @return type with changed name and the same id
      */
     public TypeDTO updateType(TypeDTO updatedTypeInformation, Long typeId) {
@@ -73,6 +77,7 @@ public class TypeService {
 
     /**
      * Function to delete existing type
+     *
      * @param typeId - id of type that you want to delete
      */
     public void deleteType(Long typeId) {

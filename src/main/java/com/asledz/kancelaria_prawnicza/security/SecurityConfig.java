@@ -46,9 +46,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests().antMatchers(POST, "/login/**").permitAll();
         http.authorizeRequests().antMatchers(GET, "/token/refresh/**").permitAll();
-        http.authorizeRequests().antMatchers(Path.DOCUMENT_VALUE + "s/by/**").hasAnyAuthority("User");
-        http.authorizeRequests().antMatchers(Path.DOCUMENT_VALUE + "s/**").hasAnyAuthority("User");
-        http.authorizeRequests().antMatchers(Path.FILE_VALUE + "s/**").hasAnyAuthority("User");
+        http.authorizeRequests().antMatchers(Path.DOCUMENT_VALUE + "s/by/**").hasAnyAuthority("User", "Manager");
+        http.authorizeRequests().antMatchers(Path.DOCUMENT_VALUE + "s/**").hasAnyAuthority("User", "Manager");
+        http.authorizeRequests().antMatchers(Path.FILE_VALUE + "s/**").hasAnyAuthority("User", "Manager");
+        http.authorizeRequests().antMatchers(Path.USER_VALUE + "s/**").hasAnyAuthority("Manager");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userService, clock));
         http.addFilterBefore(new CustomAuthorizationFilter(clock), UsernamePasswordAuthenticationFilter.class);

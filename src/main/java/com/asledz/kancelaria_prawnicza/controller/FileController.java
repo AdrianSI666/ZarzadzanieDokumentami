@@ -28,6 +28,7 @@ public class FileController {
 
     /**
      * Endpoint to download file from backend.
+     *
      * @param id of file that you want to download
      * @return ResponseEntity with http header that show that body is a file and with body
      * containing bytes of file.
@@ -35,9 +36,9 @@ public class FileController {
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         FileDTO fileToSend = fileService.getFileById(id);
-        log.info("Sending file with id:" +  id);
+        log.info("Sending file with id:" + id);
         log.info(fileToSend.name());
-        String fileName = fileToSend.name()+fileToSend.extension();
+        String fileName = fileToSend.name() + fileToSend.extension();
         log.info(fileName);
         log.info(fileToSend.extension());
         return ResponseEntity.ok()
@@ -48,6 +49,7 @@ public class FileController {
 
     /**
      * Endpoint to add file to database.
+     *
      * @param formData - MultipartFile that contains bytes of file, InputStream and extension of file.
      * @return ResponseEntity with note that everything went correct.
      */

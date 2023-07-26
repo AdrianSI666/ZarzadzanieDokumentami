@@ -4,6 +4,7 @@ import com.asledz.kancelaria_prawnicza.exception.ForbiddenException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,10 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     log.info("User: {} with roles: {}", username, authorities);
                     filterChain.doFilter(request, response);
-                } catch (Exception e) {
+                } catch (JWTVerificationException e) {
                     throw new ForbiddenException("Error somebody gave bad token to get resources with exception: %s At %s.".formatted(e.getMessage(), clock.instant().toString()));
+                } catch (Exception e) {
+                    throw e;
                 }
             } else {
                 log.info("Somebody is trying to use resources without token at %s.".formatted(clock.instant().toString()));

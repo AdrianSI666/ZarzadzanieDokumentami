@@ -23,10 +23,11 @@ public enum FilterAndSort {
     private static final Map<String, FilterAndSort> BY_LABEL = new HashMap<>();
 
     static {
-        for (FilterAndSort e: values()) {
+        for (FilterAndSort e : values()) {
             BY_LABEL.put(e.value, e);
         }
     }
+
     FilterAndSort(String contentType
     ) {
         this.value = contentType;
