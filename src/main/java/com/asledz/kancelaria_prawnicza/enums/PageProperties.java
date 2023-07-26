@@ -21,8 +21,4 @@ public enum PageProperties {
     ) {
         this.name = contentType;
     }
-
-    public static PageProperties valueOfColumnLabels(String label) {
-        return BY_LABEL.get(label);
-    }
 }

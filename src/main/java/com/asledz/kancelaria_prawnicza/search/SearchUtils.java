@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.search.Query;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
@@ -51,20 +50,5 @@ public class SearchUtils {
             stream.reset();
             return stream.incrementToken();
         }
-    }
-
-    public Query getKeywordQuery(
-            String searchTerm,
-            QueryBuilder queryBuilder,
-            String fieldName,
-            float boost) {
-        return queryBuilder
-                .keyword()
-                .fuzzy()
-                .withEditDistanceUpTo(1)
-                .onField(fieldName)
-                .boostedTo(boost)
-                .matching(searchTerm)
-                .createQuery();
     }
 }

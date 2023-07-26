@@ -27,8 +27,4 @@ public enum ColumnLabels {
     ) {
         this.path = contentType;
     }
-
-    public static ColumnLabels valueOfColumnLabels(String label) {
-        return BY_LABEL.get(label);
-    }
 }
