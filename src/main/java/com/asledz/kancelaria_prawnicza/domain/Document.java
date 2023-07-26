@@ -69,9 +69,6 @@ public class Document implements Serializable {
     @ManyToOne
     @IndexedEmbedded
     private Type type;
-    @ManyToMany
-    @IndexedEmbedded
-    private Collection<Tag> tags;
     @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     @JsonIgnore
