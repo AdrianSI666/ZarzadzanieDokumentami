@@ -2,11 +2,8 @@ package com.asledz.kancelaria_prawnicza.service;
 
 import com.asledz.kancelaria_prawnicza.domain.Role;
 import com.asledz.kancelaria_prawnicza.dto.RoleDTO;
-import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.RoleRepository;
-import com.asledz.kancelaria_prawnicza.specification.CustomSpecification;
-import com.asledz.kancelaria_prawnicza.specification.SearchCriteria;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
