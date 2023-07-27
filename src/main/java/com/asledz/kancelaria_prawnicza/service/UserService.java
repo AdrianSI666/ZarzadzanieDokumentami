@@ -60,31 +60,12 @@ public class UserService implements UserDetailsService {
         return userPage.map(mapper::map);
     }
 
-    public UserDTO getUserById(Long id) {
-        log.info("Getting user with id: %d".formatted(id));
-        return mapper.map(userRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, id))
-        ));
-    }
-
     public UserAuthorities getUserDetailsByEmail(String email) {
         log.info("Getting user with email: %s".formatted(email));
         CustomSpecification<User> specByName = new CustomSpecification<>(new SearchCriteria("email", ":", email));
         User user = userRepository.findOne(specByName).orElseThrow(() -> new NotFoundException("Couldn't find user with email: %s".formatted(email)));
 
         return new UserAuthorities(user.getEmail(), user.getRoles());
-    }
-
-    public Page<UserDTO> getUsersByRole(Long roleId, Integer page) {
-        log.info("Getting users by roleId: %d".formatted(roleId));
-        CustomSpecification<User> usersByRoleId = new CustomSpecification<>(new SearchCriteria("role_id",
-                ":",
-                roleId));
-        int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize);
-        Page<User> userPage = userRepository.findAll(usersByRoleId, paging);
-        return userPage.map(mapper::map);
     }
 
     public UserDTO getUserByEmail(String email) {

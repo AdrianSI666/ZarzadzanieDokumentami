@@ -16,10 +16,11 @@ public class GeneralExceptionHandler {
     private final Clock clock;
 
     /**
-     * Method to wrap exception with additional data and prepare it to be sent outside to user.
+     * Method to wrap exception BadRequestException with additional data and prepare it to be sent outside to user.
      *
      * @param e exception that caused handler to be invoked.
-     * @return ResponseEntity with containing exception details and http status.
+     * @return ResponseEntity with containing exception details and http status code 409 meaning exception occurred while
+     * processing data.
      */
     @ExceptionHandler(value = {BadRequestException.class})
     public ResponseEntity<Object> handleDataConflict(BadRequestException e) {
@@ -34,7 +35,8 @@ public class GeneralExceptionHandler {
      * Method to wrap exception with additional data and prepare it to be sent outside to user.
      *
      * @param e exception that caused handler to be invoked.
-     * @return ResponseEntity with containing exception details and http status.
+     * @return ResponseEntity with containing exception details and http status code 403 meaning you don't have
+     * authorities for requested resources.
      */
     @ExceptionHandler(value = {ForbiddenException.class})
     public ResponseEntity<Object> handleForbiddenException(ForbiddenException e) {
@@ -49,7 +51,8 @@ public class GeneralExceptionHandler {
      * Method to wrap exception with additional data and prepare it to be sent outside to user.
      *
      * @param e exception that caused handler to be invoked.
-     * @return ResponseEntity with containing exception details and http status.
+     * @return ResponseEntity with containing exception details and http status code 401 - provided token/login data is
+     * incorrect.
      */
     @ExceptionHandler(value = {LoginException.class})
     public ResponseEntity<Object> handleLoginException(LoginException e) {
@@ -64,29 +67,14 @@ public class GeneralExceptionHandler {
      * Method to wrap exception with additional data and prepare it to be sent outside to user.
      *
      * @param e exception that caused handler to be invoked.
-     * @return ResponseEntity with containing exception details and http status.
+     * @return ResponseEntity with containing exception details and http status code 404 - requested resource doesn't
+     * exist.
      */
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<Object> handleNotFoundException(NotFoundException e) {
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         String message = "The requested data could not be found";
         log.error("Object not found. Exception occurred: %s".formatted(e.getMessage()), e);
-        ExceptionData exceptionData = new ExceptionData(message, httpStatus, clock.instant());
-        return new ResponseEntity<>(exceptionData, httpStatus);
-    }
-
-
-    /**
-     * Method to wrap exception with additional data and prepare it to be sent outside to user.
-     *
-     * @param e exception that caused handler to be invoked.
-     * @return ResponseEntity with containing exception details and http status.
-     */
-    @ExceptionHandler(value = {ServerErrorException.class})
-    public ResponseEntity<Object> handleServerError(BadRequestException e) {
-        HttpStatus httpStatus = HttpStatus.CONFLICT;
-        String message = "There was error on the server while processing your request. Try again later.";
-        log.error("Runtime exception occurred: " + e.getMessage(), e);
         ExceptionData exceptionData = new ExceptionData(message, httpStatus, clock.instant());
         return new ResponseEntity<>(exceptionData, httpStatus);
     }

@@ -34,17 +34,6 @@ public class UserController {
         return ResponseEntity.ok().body(converter.convertDataFromPageToMap(userDTOPage));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
-    }
-
-    @GetMapping(Path.ROLE_VALUE + "/{id}")
-    public ResponseEntity<Map<String, Object>> getUsersByRoleId(@PathVariable Long id, @RequestParam(defaultValue = "1") Integer page) {
-        Page<UserDTO> userDTOPage = userService.getUsersByRole(id, page);
-        return ResponseEntity.ok(converter.convertDataFromPageToMap(userDTOPage));
-    }
-
     @PostMapping()
     public ResponseEntity<UserDTO> addUser(@RequestBody NewUserDTO newUserDTO) {
         return ResponseEntity.ok(userService.addUser(newUserDTO));

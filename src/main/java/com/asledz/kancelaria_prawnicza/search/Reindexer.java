@@ -16,6 +16,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+/**
+ * Class to force indexing of current database to hibernate search using Lucene.
+ * This class if annotated with '@Component' will reindex database on startup.
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class Reindexer {
@@ -23,10 +27,13 @@ public class Reindexer {
     private EntityManager entityManager;
     private final MassIndexerProgressMonitor monitor = new SimpleIndexingProgressMonitor();
 
+    /**
+     * Function that will reindex database on startup.
+     */
     @EventListener(ApplicationStartedEvent.class)
     @SneakyThrows
     @Transactional
-    public void builIndexOnStartup() {
+    public void buildIndexOnStartup() {
         log.info("Rebuild index");
         FullTextEntityManager fullTextEntityManager
                 = Search.getFullTextEntityManager(entityManager);
@@ -36,6 +43,11 @@ public class Reindexer {
         log.info("Rebuilding index finished");
     }
 
+    /**
+     * Function to force reindex of database for HibernateSearch and Lucene.
+     *
+     * @param purge boolean telling if you want to purge old indexes.
+     */
     @SneakyThrows
     @Transactional
     public void reindex(boolean purge) {

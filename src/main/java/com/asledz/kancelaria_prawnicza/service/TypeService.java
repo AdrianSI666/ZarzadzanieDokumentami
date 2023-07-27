@@ -59,29 +59,4 @@ public class TypeService {
                 .build();
         return mapper.map(typeRepository.save(type));
     }
-
-    /**
-     * Function to update existing type
-     *
-     * @param updatedTypeInformation - contains changed name of type
-     * @param typeId                 - id of type that you want to change
-     * @return type with changed name and the same id
-     */
-    public TypeDTO updateType(TypeDTO updatedTypeInformation, Long typeId) {
-        log.info("Updating type with id: %d".formatted(typeId));
-        Type oldType = typeRepository.findById(typeId).orElseThrow(
-                () -> new NotFoundException(String.format(TYPE_NOT_FOUND_MSG, typeId)));
-        oldType.setName(updatedTypeInformation.name());
-        return mapper.map(typeRepository.save(oldType));
-    }
-
-    /**
-     * Function to delete existing type
-     *
-     * @param typeId - id of type that you want to delete
-     */
-    public void deleteType(Long typeId) {
-        log.info("Deleting type with id: %d".formatted(typeId));
-        typeRepository.deleteById(typeId);
-    }
 }

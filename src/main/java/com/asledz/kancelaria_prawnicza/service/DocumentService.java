@@ -3,7 +3,6 @@ package com.asledz.kancelaria_prawnicza.service;
 import com.asledz.kancelaria_prawnicza.domain.Document;
 import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.domain.Type;
-import com.asledz.kancelaria_prawnicza.dto.CountDocumentsByDay;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
@@ -34,13 +33,7 @@ import org.springframework.util.MultiValueMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -100,73 +93,6 @@ public class DocumentService {
         ));
     }
 
-    public Page<DocumentDTO> getDocumentsByUser(Long userId, Integer page) {
-        log.info("Getting documents by userId: %d".formatted(userId));
-        CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("user_id",
-                ":",
-                userId));
-        int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize, Sort.by("id"));
-        Page<Document> documentPage = documentRepository.findAll(documentsByUserId, paging);
-        return documentPage.map(mapper::map);
-    }
-
-    public Page<DocumentDTO> getDocumentsByType(Long typeId, Integer page) {
-        log.info("Getting documents by typeId: %d".formatted(typeId));
-        CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("type_id",
-                ":",
-                typeId));
-        int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize, Sort.by("id"));
-        Page<Document> documentPage = documentRepository.findAll(documentsByUserId, paging);
-        return documentPage.map(mapper::map);
-    }
-
-    public Page<DocumentDTO> getDocumentsByTag(Long tagId, Integer page) {
-        log.info("Getting documents by tagId: %d".formatted(tagId));
-        CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("tag_id",
-                ":",
-                tagId));
-        int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize, Sort.by("id"));
-        Page<Document> documentPage = documentRepository.findAll(documentsByUserId, paging);
-        return documentPage.map(mapper::map);
-    }
-
-    public Page<DocumentDTO> getDocumentsByText(Integer page, String prompt) {
-        log.info("Page %d of all documents by Text".formatted(page));
-        int pageSize = 5;
-        page -= 1;
-        Pageable paging = PageRequest.of(page, pageSize, Sort.by("id"));
-        Page<Document> documentPage;
-        if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, "text", prompt)) {
-            FullTextEntityManager fullTextEntityManager
-                    = Search.getFullTextEntityManager(entityManager);
-            QueryBuilder queryBuilder = searchUtils.getQueryBuilder(fullTextEntityManager, File.class);
-            Query textQuery = queryBuilder
-                    .keyword()
-                    .fuzzy()
-                    .withEditDistanceUpTo(2)
-                    .withPrefixLength(1)
-                    .onFields("text") //"document.title"
-                    .matching(prompt)
-                    .createQuery();
-            FullTextQuery fullTextQuery = fullTextEntityManager.createFullTextQuery(textQuery,
-                            File.class)
-                    .setFirstResult(pageSize * page)
-                    .setMaxResults(pageSize);
-            @SuppressWarnings("unchecked")
-            List<File> files = fullTextQuery.getResultList();
-            documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());
-        } else {
-            throw new BadRequestException("Couldn't use hibernate search on text field with given prompt: %s".formatted(prompt));
-        }
-        return documentPage.map(mapper::map);
-    }
-
     public Page<DocumentDTO> getDocumentsByParameters(MultiValueMap<String, String> parameters) {
         int page = 0;
         if (parameters.containsKey(PAGE_NUMBER.name)) {
@@ -223,24 +149,6 @@ public class DocumentService {
     public void deleteDocument(Long documentId) {
         log.info("Deleting Document with id: %d".formatted(documentId));
         documentRepository.deleteById(documentId);
-    }
-
-    public List<CountDocumentsByDay> countDocumentsByDay(Long userId) {
-        log.info("Counting documents by date for user with id: {}", userId);
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
-        Root<Document> documentRoot = criteriaQuery.from(Document.class);
-        //Group By + Having, jeśli bez having to usunąć join i w group by zostawić tylko date
-        Join<Object, Object> productsJoin = documentRoot.join("owner");
-        criteriaQuery.groupBy(documentRoot.get("date"), productsJoin.get("id"));
-        criteriaQuery.having(criteriaBuilder.equal(productsJoin.get("id"), userId));
-
-        criteriaQuery.multiselect(documentRoot.get("date"), criteriaBuilder.count(documentRoot));
-        criteriaQuery.orderBy(criteriaBuilder.desc(documentRoot.get("date")));
-        TypedQuery<Object[]> typedQuery = entityManager.createQuery(criteriaQuery);
-        List<Object[]> resultList = typedQuery.getResultList();
-        entityManager.close();
-        return resultList.stream().map(result -> new CountDocumentsByDay((Instant) result[0], (Long) result[1])).toList();
     }
 
     public List<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId) {
