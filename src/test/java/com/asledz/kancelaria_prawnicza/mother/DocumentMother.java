@@ -2,7 +2,6 @@ package com.asledz.kancelaria_prawnicza.mother;
 
 import com.asledz.kancelaria_prawnicza.domain.Document;
 
-import java.time.Clock;
 import java.time.Instant;
 
 public class DocumentMother {

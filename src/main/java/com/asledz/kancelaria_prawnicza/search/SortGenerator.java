@@ -1,7 +1,6 @@
 package com.asledz.kancelaria_prawnicza.search;
 
 import com.asledz.kancelaria_prawnicza.enums.SortEnum;
-import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
 import com.asledz.kancelaria_prawnicza.exception.WrongRequestValuesException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.asledz.kancelaria_prawnicza.enums.SortEnum.*;
+import static com.asledz.kancelaria_prawnicza.enums.SortEnum.NULL;
 
 @Component
 @Slf4j

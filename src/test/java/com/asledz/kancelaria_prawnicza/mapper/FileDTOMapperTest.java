@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 
@@ -39,7 +38,7 @@ class FileDTOMapperTest {
         file.setId(1L);
         file.setText("Text");
         document.setFile(file);
-        
+
         assertThatThrownBy(() -> fileDTOMapper.map(file))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("Error while decompressing byte array occurred on file: %d".formatted(1L));

@@ -5,7 +5,6 @@ import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.service.FileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +66,7 @@ class FileControllerTest {
                 MockMvcRequestBuilders.multipart(Path.FILE_VALUE + "s/{id}",
                                 id)
                         .file(file);
-        
+
         doNothing().when(fileService).addFile(file, 1L);
         MockMvcBuilders.standaloneSetup(fileController)
                 .build()

@@ -1,37 +1,28 @@
 package com.asledz.kancelaria_prawnicza.service;
 
-import static com.asledz.kancelaria_prawnicza.service.TypeService.TYPE_NOT_FOUND_MSG;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.asledz.kancelaria_prawnicza.domain.Type;
-import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.TypeDTO;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
-import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.mapper.TypeDTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.TypeRepository;
-
-import java.util.ArrayList;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.ArrayList;
+import java.util.Optional;
+
+import static com.asledz.kancelaria_prawnicza.service.TypeService.TYPE_NOT_FOUND_MSG;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class TypeServiceTest {

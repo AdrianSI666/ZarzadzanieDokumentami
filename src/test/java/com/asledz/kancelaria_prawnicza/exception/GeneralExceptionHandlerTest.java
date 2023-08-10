@@ -1,17 +1,15 @@
 package com.asledz.kancelaria_prawnicza.exception;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 
-import org.junit.jupiter.api.Disabled;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeneralExceptionHandlerTest {
     /**

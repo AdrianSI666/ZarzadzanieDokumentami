@@ -7,7 +7,6 @@ import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.FileDTO;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
-import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.mapper.FileDTOMapper;
 import com.asledz.kancelaria_prawnicza.mother.UserMother;
 import com.asledz.kancelaria_prawnicza.repository.FileRepository;
@@ -15,7 +14,6 @@ import com.asledz.kancelaria_prawnicza.repository.TypeRepository;
 import com.asledz.kancelaria_prawnicza.repository.UserRepository;
 import com.asledz.kancelaria_prawnicza.utilis.TextExtractor;
 import com.asledz.kancelaria_prawnicza.utilis.Zipper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,21 +28,16 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Optional;
 
 import static com.asledz.kancelaria_prawnicza.service.FileService.FILE_NOT_FOUND_MSG;
-import static com.asledz.kancelaria_prawnicza.service.TypeService.TYPE_NOT_FOUND_MSG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)

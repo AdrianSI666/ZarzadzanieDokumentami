@@ -8,7 +8,6 @@ import com.asledz.kancelaria_prawnicza.dto.UserAuthorities;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.helper.DataToPage;
-import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.mapper.UserDTOMapper;
 import com.asledz.kancelaria_prawnicza.mother.UserMother;
 import com.asledz.kancelaria_prawnicza.repository.RoleRepository;
@@ -40,7 +39,8 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 import static com.asledz.kancelaria_prawnicza.service.UserService.USER_NOT_FOUND_MSG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 

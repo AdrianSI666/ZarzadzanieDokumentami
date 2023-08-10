@@ -1,33 +1,8 @@
 package com.asledz.kancelaria_prawnicza.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.asledz.kancelaria_prawnicza.domain.Document;
-import com.asledz.kancelaria_prawnicza.domain.Type;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
-import com.asledz.kancelaria_prawnicza.dto.TypeDTO;
-import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
-import com.asledz.kancelaria_prawnicza.repository.DocumentRepository;
-import com.asledz.kancelaria_prawnicza.repository.TypeRepository;
-import com.asledz.kancelaria_prawnicza.search.SearchUtils;
 import com.asledz.kancelaria_prawnicza.service.DocumentService;
-import com.asledz.kancelaria_prawnicza.service.TypeService;
 import com.asledz.kancelaria_prawnicza.utilis.Converter;
-
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -44,6 +19,16 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.MultiValueMap;
+
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {DocumentController.class})
 @ExtendWith(SpringExtension.class)
