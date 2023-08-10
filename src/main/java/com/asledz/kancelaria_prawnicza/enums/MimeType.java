@@ -12,7 +12,8 @@ public enum MimeType {
     UOF("application/octet-stream"),
     DOCX("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     TXT("text/plain"),
-    RTF("application/rtf");
+    RTF("application/rtf"),
+    NULL("null");
     public final String contentType;
 
     private static final Map<String, MimeType> BY_LABEL = new HashMap<>();

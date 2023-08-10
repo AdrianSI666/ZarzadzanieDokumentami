@@ -37,10 +37,7 @@ public class FileController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         FileDTO fileToSend = fileService.getFileById(id);
         log.info("Sending file with id:" + id);
-        log.info(fileToSend.name());
         String fileName = fileToSend.name() + fileToSend.extension();
-        log.info(fileName);
-        log.info(fileToSend.extension());
         return ResponseEntity.ok()
                 .contentType(MediaType.valueOf(fileToSend.extension()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -55,7 +52,8 @@ public class FileController {
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE, path = "/{id}")
-    public ResponseEntity<String> saveFile(@PathVariable Long id, @RequestParam("file") MultipartFile formData) {
+    public ResponseEntity<String> saveFile(@PathVariable Long id,
+                                           @RequestParam("file") MultipartFile formData) {
         fileService.addFile(formData, id);
         //Without this line tomcat doesn't delete temp upload file if worked with Gotenberg service
         System.gc();

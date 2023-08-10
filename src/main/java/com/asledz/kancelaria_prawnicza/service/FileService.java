@@ -2,6 +2,7 @@ package com.asledz.kancelaria_prawnicza.service;
 
 import com.asledz.kancelaria_prawnicza.domain.Document;
 import com.asledz.kancelaria_prawnicza.domain.File;
+import com.asledz.kancelaria_prawnicza.domain.Type;
 import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.FileDTO;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
@@ -44,24 +45,33 @@ public class FileService {
         try {
             byte[] bytesOfFile = multipartFile.getBytes();
             String fileName = multipartFile.getOriginalFilename();
-            if (fileName != null) {
+            if (fileName != null && !"".equals(fileName)) {
                 fileName = StringUtils.cleanPath(fileName);
             } else {
                 fileName = "No name";
             }
-            log.info(multipartFile.getContentType());
-            String textData = TextExtractor.extractTextFromFile(multipartFile.getInputStream(), multipartFile.getContentType(), fileName);
-            byte[] compressedBytes = Zipper.compress(bytesOfFile);
+            if (fileName.lastIndexOf(".") != -1) {
+                fileName = fileName.substring(0, fileName.lastIndexOf("."));
+            }
             User user = userRepository.findById(userId).orElseThrow(
                     () -> new NotFoundException("Failed to save file, because couldn't find user with given id: %d".formatted(userId)));
+            Type newlyCreatedFileType = typeRepository.findById(0L).orElseThrow(
+                    () -> new NotFoundException("Database lacks default type for newly added files"));
+            log.info(multipartFile.getContentType());
+
+            String textData = TextExtractor.extractTextFromFile(multipartFile.getInputStream(),
+                    multipartFile.getContentType(),
+                    fileName);
+            byte[] compressedBytes = Zipper.compress(bytesOfFile);
+
+
             File file = File.builder()
                     .extension(multipartFile.getContentType())
                     .text(textData)
                     .content(compressedBytes)
                     .document(Document.builder()
-                            .title(fileName.substring(0, fileName.lastIndexOf(".")))
-                            .type(typeRepository.findById(0L).orElseThrow(
-                                    () -> new RuntimeException("Database lacks default type for newly added files")))
+                            .title(fileName)
+                            .type(newlyCreatedFileType)
                             .owner(user)
                             .build())
                     .build();

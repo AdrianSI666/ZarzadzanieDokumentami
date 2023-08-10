@@ -17,9 +17,17 @@ public class FileToPdf {
     private FileToPdf() {
     }
 
+    /**
+     * Method to use Gotenberg local service https://gotenberg.dev/docs/getting-started/introduction
+     * to convert file from format that libreoffice can convert from to pdf. Its purpose is to convert
+     * file to pdf so program can read letters from it and use it in Lucene Indexing and Searching.
+     *
+     * @param file     InputStream of file that you want to convert
+     * @param fileName file's name without extension
+     * @return ByteArrayOutputStream of the same file and content but in pdf format.
+     */
     public static ByteArrayOutputStream convert(InputStream file, String fileName) {
         try {
-
             String serverUrl = "http://localhost:3000/forms/libreoffice/convert";
             HttpPost post = new HttpPost(serverUrl);
 

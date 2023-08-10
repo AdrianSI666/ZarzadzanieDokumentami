@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class TypeController {
      */
     @PostMapping()
     public ResponseEntity<TypeDTO> addType(@RequestBody TypeDTO typeDTO) {
-        return ResponseEntity.ok().body(typeService.addType(typeDTO));
+        return ResponseEntity.created(URI.create("types")).body(typeService.addType(typeDTO));
     }
 
 }

@@ -60,23 +60,18 @@ public class DocumentService {
             page = Integer.parseInt(pageProperties.get(PAGE_NUMBER.name)) - 1;
             pageProperties.remove(PAGE_NUMBER.name);
         }
-        log.info("Page %d of all documents by Parameters".formatted(page));
         int pageSize = 5;
         if (pageProperties.containsKey(PAGE_SIZE.name)) {
             pageSize = Integer.parseInt(pageProperties.get(PAGE_SIZE.name));
             pageProperties.remove(PAGE_SIZE.name);
         }
+        log.info("Page %d of all documents".formatted(page));
         Pageable paging;
         if (pageProperties.size() > 0) {
             List<Sort> sortList = SortGenerator.getSortsFromMap(pageProperties);
-            Sort result;
-            if (sortList.isEmpty()) {
-                result = Sort.by("id").descending();
-            } else {
-                result = sortList.get(0);
-                for (int i = 1; i < sortList.size(); i++) {
-                    result.and(sortList.get(i));
-                }
+            Sort result = sortList.get(0);
+            for (int i = 1; i < sortList.size(); i++) {
+                result = result.and(sortList.get(i));
             }
             paging = PageRequest.of(page, pageSize, result);
         } else {
@@ -93,6 +88,14 @@ public class DocumentService {
         ));
     }
 
+    /**
+     * @param parameters MultiValueMap containing keys from FilterAndSortEnum values and
+     *                   list of values corresponding to them. It's done like this, because
+     *                   some keys can correspond to two values like date can have one value and
+     *                   be a single point or have two values and be a range.
+     * @return Page of DocumentDTO containing results from Hibernate Search queries generated on
+     * given parameter.
+     */
     public Page<DocumentDTO> getDocumentsByParameters(MultiValueMap<String, String> parameters) {
         int page = 0;
         if (parameters.containsKey(PAGE_NUMBER.name)) {
@@ -106,9 +109,10 @@ public class DocumentService {
             parameters.remove(PAGE_SIZE.name);
         }
         Pageable paging = PageRequest.of(page, pageSize);
-        Page<Document> documentPage;
-        FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
+
+        FullTextEntityManager fullTextEntityManager = searchUtils.getFullTextEntityManager();
         QueryBuilder queryBuilder = searchUtils.getQueryBuilder(fullTextEntityManager, File.class);
+
         FilterAndSortParameters filterAndSortParameters = QueriesGenerator.extractQueriesFromMultiMap(queryBuilder, searchUtils, parameters);
         if (filterAndSortParameters.filterQueries().isEmpty()) {
             throw new BadRequestException("Can't use filtering without any parameters. " + parameters);
@@ -127,7 +131,7 @@ public class DocumentService {
         }
         @SuppressWarnings("unchecked")
         List<File> files = fullTextQuery.getResultList();
-        documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());
+        Page<Document> documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());
         return documentPage.map(mapper::map);
     }
 
@@ -151,6 +155,11 @@ public class DocumentService {
         documentRepository.deleteById(documentId);
     }
 
+    /**
+     * @param userId - id of user that owns documents
+     * @return List of documents that given user owns and are not given dates. Used to give
+     * user an option to change null values in date.
+     */
     public List<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId) {
         log.info("Getting documents by ownerId: %d".formatted(userId));
         CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("owner_id",

@@ -4,6 +4,7 @@ import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.security.filter.CustomAuthenticationFilter;
 import com.asledz.kancelaria_prawnicza.security.filter.CustomAuthorizationFilter;
 import com.asledz.kancelaria_prawnicza.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(Path.FILE_VALUE + "s/**").hasAnyAuthority("User", "Manager");
         http.authorizeRequests().antMatchers(Path.USER_VALUE + "s/**").hasAnyAuthority("Manager");
         http.authorizeRequests().anyRequest().authenticated();
-        http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userService, clock));
+        http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userService, clock, new ObjectMapper()));
         http.addFilterBefore(new CustomAuthorizationFilter(clock), UsernamePasswordAuthenticationFilter.class);
     }
 

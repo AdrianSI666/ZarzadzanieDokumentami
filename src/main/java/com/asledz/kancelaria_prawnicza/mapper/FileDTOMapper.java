@@ -15,8 +15,8 @@ public class FileDTOMapper implements DTOMapper<File, FileDTO> {
         byte[] decompressed;
         try {
             decompressed = Zipper.decompress(source.getContent());
-        } catch (IOException e) {
-            throw new BadRequestException("Error while decompressing byte array occurred on file: %d".formatted(source.getDocument().getId()));
+        } catch (IOException | NullPointerException e) {
+            throw new BadRequestException("Error while decompressing byte array occurred on file: %d".formatted(source.getDocument().getId()), e);
         }
         return FileDTO.builder()
                 .id(source.getId())

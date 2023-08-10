@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Clock;
 
+/**
+ * Class with methods to wrap exception with additional data and prepare it to be sent outside to user.
+ */
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
@@ -16,8 +19,6 @@ public class GeneralExceptionHandler {
     private final Clock clock;
 
     /**
-     * Method to wrap exception BadRequestException with additional data and prepare it to be sent outside to user.
-     *
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status code 409 meaning exception occurred while
      * processing data.
@@ -32,8 +33,6 @@ public class GeneralExceptionHandler {
     }
 
     /**
-     * Method to wrap exception with additional data and prepare it to be sent outside to user.
-     *
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status code 403 meaning you don't have
      * authorities for requested resources.
@@ -48,8 +47,6 @@ public class GeneralExceptionHandler {
     }
 
     /**
-     * Method to wrap exception with additional data and prepare it to be sent outside to user.
-     *
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status code 401 - provided token/login data is
      * incorrect.
@@ -64,8 +61,6 @@ public class GeneralExceptionHandler {
     }
 
     /**
-     * Method to wrap exception with additional data and prepare it to be sent outside to user.
-     *
      * @param e exception that caused handler to be invoked.
      * @return ResponseEntity with containing exception details and http status code 404 - requested resource doesn't
      * exist.
@@ -78,4 +73,19 @@ public class GeneralExceptionHandler {
         ExceptionData exceptionData = new ExceptionData(message, httpStatus, clock.instant());
         return new ResponseEntity<>(exceptionData, httpStatus);
     }
+
+    /**
+     * @param e exception that caused handler to be invoked.
+     * @return ResponseEntity with containing exception details and http status code 404 - requested resource doesn't
+     * exist.
+     */
+    @ExceptionHandler(value = {WrongRequestValuesException.class})
+    public ResponseEntity<Object> handleWrongRequestValuesException(NotFoundException e) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        String message = "The requested method can't process given data.";
+        log.error("The requested method can't process given data: %s".formatted(e.getMessage()), e);
+        ExceptionData exceptionData = new ExceptionData(message, httpStatus, clock.instant());
+        return new ResponseEntity<>(exceptionData, httpStatus);
+    }
+
 }

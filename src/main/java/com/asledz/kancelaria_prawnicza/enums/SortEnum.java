@@ -8,7 +8,8 @@ public enum SortEnum {
     SORT_DATE("sort_date"),
     SORT_COST("sort_cost"),
     SORT_PAID("sort_paid"),
-    SORT_TYPE("sort_type");
+    SORT_TYPE("sort_type"),
+    NULL("null");
     public final String value;
 
     private static final Map<String, SortEnum> BY_LABEL = new HashMap<>();

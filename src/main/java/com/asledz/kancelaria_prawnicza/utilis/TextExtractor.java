@@ -16,18 +16,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import static com.asledz.kancelaria_prawnicza.enums.MimeType.NULL;
+
 @Slf4j
 public class TextExtractor {
     private TextExtractor() {
 
     }
 
+    /**
+     * Method to extract text from file for Lucene to Index and Search by.
+     *
+     * @param inputStream - of file
+     * @param contentType - file content type, currently only pdf and dox are extracted on java. Rest
+     *                    is send to Gotenberg local service to convert them to pdf and be read as pdf.
+     * @param fileName    - file name without extension.
+     * @return String containing full text of a file for lucene to build its Index and be able to search
+     * by it.
+     * @throws IOException if there was error while reading from inputStream.
+     */
     public static String extractTextFromFile(InputStream inputStream, String contentType, String fileName) throws IOException {
         log.info("Processing content type: %s".formatted(contentType));
         String textData;
         MimeType mimeType = MimeType.valueOfMimeType(contentType);
         log.info(String.valueOf(mimeType));
-        switch (mimeType) {
+        switch (mimeType != null ? mimeType : NULL) {
             case DOC -> {
                 POIFSFileSystem fs = new POIFSFileSystem(inputStream);
                 HWPFDocument doc = new HWPFDocument(fs);

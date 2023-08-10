@@ -1,6 +1,8 @@
 package com.asledz.kancelaria_prawnicza.search;
 
 import com.asledz.kancelaria_prawnicza.enums.SortEnum;
+import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
+import com.asledz.kancelaria_prawnicza.exception.WrongRequestValuesException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.asledz.kancelaria_prawnicza.enums.SortEnum.*;
 
 @Component
 @Slf4j
@@ -19,7 +23,7 @@ public class SortGenerator {
         List<Sort> sortList = new ArrayList<>();
         params.forEach((key, value) -> {
             log.info(key + " " + value);
-            switch (SortEnum.valueOfSort(key)) {
+            switch (SortEnum.valueOfSort(key) != null ? SortEnum.valueOfSort(key) : NULL) {
                 case SORT_TITLE -> {
                     Sort sort = Sort.by("title");
                     if ("true".equals(value)) sort = sort.descending();
@@ -45,6 +49,7 @@ public class SortGenerator {
                     if ("true".equals(value)) sort = sort.descending();
                     sortList.add(sort);
                 }
+                default -> throw new WrongRequestValuesException("Can't sort by given key: %s".formatted(key));
             }
         });
         return sortList;

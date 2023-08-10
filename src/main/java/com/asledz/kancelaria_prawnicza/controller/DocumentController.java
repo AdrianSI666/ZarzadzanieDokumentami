@@ -37,6 +37,7 @@ public class DocumentController {
      * @param pageProperties - map with:
      *                       page : number of page that you want to get
      *                       pageSize : numbers of items per page
+     *                       sortParams: key values to sort by with boolean if they're reversed or not
      * @return ResponseEntity with body containing Map of "data" - List of Documents
      * "currentPage" - current page which was given
      * "totalPages" - total number of pages that you can get

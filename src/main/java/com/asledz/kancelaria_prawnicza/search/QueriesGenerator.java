@@ -2,8 +2,9 @@ package com.asledz.kancelaria_prawnicza.search;
 
 import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
-import com.asledz.kancelaria_prawnicza.enums.FilterAndSort;
+import com.asledz.kancelaria_prawnicza.enums.FilterAndSortEnum;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
+import com.asledz.kancelaria_prawnicza.exception.WrongRequestValuesException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SortField;
 import org.hibernate.search.query.dsl.QueryBuilder;
@@ -16,7 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.*;
-import static com.asledz.kancelaria_prawnicza.enums.FilterAndSort.FILTER_TEXT;
+import static com.asledz.kancelaria_prawnicza.enums.FilterAndSortEnum.FILTER_TEXT;
+import static com.asledz.kancelaria_prawnicza.enums.FilterAndSortEnum.NULL;
 
 @Component
 public class QueriesGenerator {
@@ -27,7 +29,7 @@ public class QueriesGenerator {
         List<Query> filterQueries = new ArrayList<>();
         List<SortField> sortFields = new ArrayList<>();
         parameters.forEach((key, values) -> {
-            switch (FilterAndSort.valueOfFilterAndSort(key)) {
+            switch (FilterAndSortEnum.valueOfFilterAndSort(key) != null ? FilterAndSortEnum.valueOfFilterAndSort(key) : NULL) {
                 case FILTER_TEXT -> {
                     String prompt = values.get(0);
                     if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, TEXT.path, prompt)) {
@@ -170,6 +172,7 @@ public class QueriesGenerator {
                         sortFields.add(new SortField(PAID.path, SortField.Type.STRING, Boolean.parseBoolean(values.get(0))));
                 case SORT_TYPE ->
                         sortFields.add(new SortField(TYPE.path, SortField.Type.STRING, Boolean.parseBoolean(values.get(0))));
+                default -> throw new WrongRequestValuesException("Can't filer/sort by given key: %s".formatted(key));
             }
         });
         return new FilterAndSortParameters(filterQueries, sortFields);

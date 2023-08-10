@@ -34,13 +34,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final Clock clock;
+    private final ObjectMapper mapper;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         String email;
         String password;
         try (BufferedReader body = request.getReader()) {
-            ObjectMapper mapper = new ObjectMapper();
             Map<String, String> map = mapper.readValue(body.readLine(), Map.class);
             email = map.get("email");
             password = map.get("password");

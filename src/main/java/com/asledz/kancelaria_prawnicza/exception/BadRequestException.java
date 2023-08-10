@@ -5,6 +5,10 @@ public class BadRequestException extends RuntimeException {
         super(message);
     }
 
+    public BadRequestException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     /**
      * Method to overwrite stack trace, so when exception occurs, which is delegated to frontend,
      * won't fill server log with stack trace of known exception.

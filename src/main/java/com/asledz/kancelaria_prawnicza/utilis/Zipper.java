@@ -6,10 +6,18 @@ import java.io.IOException;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * Zipper to compress or decompress given bytes to save space in database.
+ */
 public class Zipper {
     private Zipper() {
     }
 
+    /**
+     * @param bytes to compress
+     * @return compressed bytes
+     * @throws IOException if there was an error reading from bytes
+     */
     public static byte[] compress(byte[] bytes) throws IOException {
         byte[] compressedBytes;
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -21,6 +29,11 @@ public class Zipper {
         return compressedBytes;
     }
 
+    /**
+     * @param bytes to decompress
+     * @return decompressed bytes
+     * @throws IOException if there was an error reading from bytes
+     */
     public static byte[] decompress(byte[] bytes) throws IOException {
         byte[] decompressedBytes;
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);

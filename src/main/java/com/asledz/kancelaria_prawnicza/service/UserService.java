@@ -71,7 +71,8 @@ public class UserService implements UserDetailsService {
     public UserDTO getUserByEmail(String email) {
         log.info("Getting user with email: %s".formatted(email));
         CustomSpecification<User> specByName = new CustomSpecification<>(new SearchCriteria("email", ":", email));
-        User user = userRepository.findOne(specByName).orElseThrow(() -> new NotFoundException("Couldn't find user with email: %s".formatted(email)));
+        User user = userRepository.findOne(specByName).orElseThrow(
+                () -> new NotFoundException("Couldn't find user with email: %s".formatted(email)));
         return mapper.map(user);
     }
 
