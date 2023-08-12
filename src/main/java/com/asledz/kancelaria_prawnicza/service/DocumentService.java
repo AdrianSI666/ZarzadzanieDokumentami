@@ -36,8 +36,6 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.DATE;
-import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TITLE;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 
