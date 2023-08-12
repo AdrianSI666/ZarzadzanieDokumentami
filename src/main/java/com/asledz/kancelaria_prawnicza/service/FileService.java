@@ -45,11 +45,12 @@ public class FileService {
         try {
             byte[] bytesOfFile = multipartFile.getBytes();
             String fileName = multipartFile.getOriginalFilename();
-            if (fileName != null && !"".equals(fileName)) {
+            if (fileName != null) {
                 fileName = StringUtils.cleanPath(fileName);
             } else {
-                fileName = "No name";
+                fileName = "No name.txt";
             }
+            String originalFileName = fileName;
             if (fileName.lastIndexOf(".") != -1) {
                 fileName = fileName.substring(0, fileName.lastIndexOf("."));
             }
@@ -61,7 +62,7 @@ public class FileService {
 
             String textData = TextExtractor.extractTextFromFile(multipartFile.getInputStream(),
                     multipartFile.getContentType(),
-                    fileName);
+                    originalFileName);
             byte[] compressedBytes = Zipper.compress(bytesOfFile);
 
 

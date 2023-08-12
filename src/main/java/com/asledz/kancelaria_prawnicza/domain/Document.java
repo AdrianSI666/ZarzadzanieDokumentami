@@ -49,6 +49,8 @@ public class Document implements Serializable {
             nullable = false,
             updatable = false
     )
+    @Field(name = "documentId", index = Index.YES, analyze = Analyze.NO, store = Store.NO)
+    @SortableField(forField = "documentId")
     private Long id;
     @Field(index = Index.YES, analyze = Analyze.YES, store = Store.NO)
     @Analyzer(impl = MorfologikAnalyzer.class)

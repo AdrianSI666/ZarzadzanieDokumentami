@@ -11,6 +11,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +23,7 @@ import javax.transaction.Transactional;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class Reindexer {
     @PersistenceContext
     private EntityManager entityManager;
@@ -38,6 +40,7 @@ public class Reindexer {
         FullTextEntityManager fullTextEntityManager
                 = Search.getFullTextEntityManager(entityManager);
         fullTextEntityManager.createIndexer()
+                .purgeAllOnStart(true)
                 .progressMonitor(monitor)
                 .startAndWait();
         log.info("Rebuilding index finished");

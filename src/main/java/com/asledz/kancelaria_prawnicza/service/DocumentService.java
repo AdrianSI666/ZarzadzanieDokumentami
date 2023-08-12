@@ -36,6 +36,8 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
+import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.DATE;
+import static com.asledz.kancelaria_prawnicza.enums.ColumnLabels.TITLE;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 
@@ -125,6 +127,10 @@ public class DocumentService {
                 .setMaxResults(pageSize);
         if (!filterAndSortParameters.sortFields().isEmpty()) {
             List<SortField> sortFields = filterAndSortParameters.sortFields();
+            org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
+            fullTextQuery.setSort(sort);
+        } else {
+            List<SortField> sortFields = List.of(new SortField("document.documentId", SortField.Type.LONG, true));
             org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
             fullTextQuery.setSort(sort);
         }
