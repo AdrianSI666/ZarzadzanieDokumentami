@@ -965,6 +965,7 @@ const UserFiles = () => {
           }}>
             <Form.Group className="mb-3" controlId="formTitle">
               <Form.Label>Czy napewno chcesz usunąć dany dokument z nazwą: {title}</Form.Label>
+              <Form.Group className="mb-3" controlId="formTitle">
               <Button className='ms-5' variant="danger" type="submit">
                 Usuń
               </Button>
@@ -973,6 +974,7 @@ const UserFiles = () => {
                 setDeleteConfirmModal(false)
               }
               }>Cofnij</Button>
+              </Form.Group>
             </Form.Group>
           </Form>
         </Modal.Body>

@@ -45,6 +45,8 @@ public class User implements Serializable {
     private String surname;
     private String email;
     private String password;
+    @Column(columnDefinition = "boolean default true")
+    private Boolean enabled = true;
     @ManyToMany
     private Collection<Role> roles;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)

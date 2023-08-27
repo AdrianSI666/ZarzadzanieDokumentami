@@ -7,19 +7,19 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/kancelaria
-    username: postgres
-    password: projektanto
+    username: ${DBUSERNAME}
+    password: ${DBPASSWORD}
     driverClassName: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     generate-ddl: true
-#    show-sql: false
+    #    show-sql: true
     properties:
       database: postgresql
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#        format_sql: true
+        #        format_sql: true
         search:
           default: # <- This is the index name
             directory_provider: filesystem
@@ -35,7 +35,7 @@ logging:
   level:
     org:
       hibernate:
-        SQL: DEBUG
+#        SQL: DEBUG
 #        type:
 #          descriptor:
 #            sql:

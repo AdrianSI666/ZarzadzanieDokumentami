@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(Path.USER_VALUE + "s/**").hasAnyAuthority("Manager");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userService, clock, new ObjectMapper()));
-        http.addFilterBefore(new CustomAuthorizationFilter(clock), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new CustomAuthorizationFilter(clock, userService), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean

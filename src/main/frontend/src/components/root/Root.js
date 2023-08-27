@@ -2,9 +2,10 @@ import React from 'react';
 import './Root.css';
 import Header from '../header/Header';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Outlet } from 'react-router-dom';
+import { useOutlet } from 'react-router-dom';
 
 function Root() {
+  const outlet = useOutlet()
   return (
     <div className="container">
       
@@ -15,7 +16,11 @@ function Root() {
         </div>
         <div className='row'>
           <div className="Root">
-            <Outlet />
+            {outlet || <div>
+              <h2>Welcome, this page can show some general information.</h2>
+              <p>To do anything on this application go to login in the top right corner.</p>
+              </div>
+            }
           </div>
         </div>
     </div>

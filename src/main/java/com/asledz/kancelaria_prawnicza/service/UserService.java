@@ -5,6 +5,7 @@ import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.NewUserDTO;
 import com.asledz.kancelaria_prawnicza.dto.UserAuthorities;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
+import com.asledz.kancelaria_prawnicza.exception.LoginException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.RoleRepository;
@@ -83,6 +84,7 @@ public class UserService implements UserDetailsService {
                 .surname(newUserInformation.surname())
                 .email(newUserInformation.email())
                 .password(passwordEncoder.encode(newUserInformation.password()))
+                .enabled(true)
                 .build();
         Role role = roleRepository.findRoleByName("User").orElseThrow(
                 () -> new NotFoundException("Can't find role: \"User\" in database"));
@@ -101,15 +103,21 @@ public class UserService implements UserDetailsService {
 
     public void deleteUser(Long userId) {
         log.info("Deleting user with id: %d".formatted(userId));
-        userRepository.deleteById(userId);
+        User oldUser = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, userId)));
+        oldUser.setEnabled(false);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) {
         CustomSpecification<User> specByUsername = new CustomSpecification<>(new SearchCriteria("email", ":", email));
         User user = userRepository.findOne(specByUsername).orElseThrow(() -> new NotFoundException("Can't find user with email: %s".formatted(email)));
+        if (Boolean.FALSE.equals(user.getEnabled())) {
+            throw new LoginException("Given user with email %s have his account disabled, but tried to log in".formatted(email));
+        }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
     }
+
 }
