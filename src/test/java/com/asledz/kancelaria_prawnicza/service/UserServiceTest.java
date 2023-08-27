@@ -331,8 +331,10 @@ class UserServiceTest {
      */
     @Test
     void testDeleteUser() {
-        doNothing().when(userRepository).deleteById(Mockito.<Long>any());
+
         userService.deleteUser(1L);
+        given(userRepository.findById(1L)).willReturn(Optional.ofNullable(user));
+
         verify(userRepository).deleteById(Mockito.<Long>any());
     }
 
@@ -369,7 +371,7 @@ class UserServiceTest {
     void testLoadUserByUsername2() {
         ArrayList<Role> roles = new ArrayList<>();
 
-        User user = new User(1L, "email", "Doe", "jane.doe@example.org", "iloveyou", roles, new ArrayList<>());
+        User user = new User(1L, "email", "Doe", "jane.doe@example.org", "iloveyou", true, roles, new ArrayList<>());
         user.setDocuments(new ArrayList<>());
         user.setEmail("jane.doe@example.org");
         user.setId(1L);
@@ -413,6 +415,7 @@ class UserServiceTest {
         user.setPassword("iloveyou");
         user.setRoles(new ArrayList<>());
         user.setSurname("Doe");
+        user.setEnabled(true);
         Optional<User> ofResult = Optional.of(user);
         when(userRepository.findOne(Mockito.<Specification<User>>any())).thenReturn(ofResult);
         UserDetails actualLoadUserByUsernameResult = userService.loadUserByUsername("jane.doe@example.org");
@@ -466,6 +469,7 @@ class UserServiceTest {
         user.setPassword("iloveyou");
         user.setRoles(new ArrayList<>());
         user.setSurname("Doe");
+        user.setEnabled(true);
         Optional<User> ofResult = Optional.of(user);
         when(userRepository.findOne(Mockito.<Specification<User>>any())).thenReturn(ofResult);
         UserDetails actualLoadUserByUsernameResult = userService.loadUserByUsername("jane.doe@example.org");
@@ -525,6 +529,7 @@ class UserServiceTest {
         user.setPassword("iloveyou");
         user.setRoles(new ArrayList<>());
         user.setSurname("Doe");
+        user.setEnabled(true);
         Optional<User> ofResult = Optional.of(user);
         when(userRepository.findOne(Mockito.<Specification<User>>any())).thenReturn(ofResult);
         UserDetails actualLoadUserByUsernameResult = userService.loadUserByUsername("jane.doe@example.org");

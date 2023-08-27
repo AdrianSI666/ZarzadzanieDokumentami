@@ -59,7 +59,7 @@ class UserTest {
      * Methods under test:
      *
      * <ul>
-     *   <li>{@link User#User(Long, String, String, String, String, Collection, Collection)}
+     *   <li>{@link User#User(Long, String, String, String, String, Boolean, Collection, Collection)}
      *   <li>{@link User#setDocuments(Collection)}
      *   <li>{@link User#setEmail(String)}
      *   <li>{@link User#setId(Long)}
@@ -80,7 +80,7 @@ class UserTest {
     void testConstructor2() {
         ArrayList<Role> roles = new ArrayList<>();
         ArrayList<Document> documents = new ArrayList<>();
-        User actualUser = new User(1L, "Name", "Doe", "jane.doe@example.org", "iloveyou", roles, documents);
+        User actualUser = new User(1L, "Name", "Doe", "jane.doe@example.org", "iloveyou", true, roles, documents);
         ArrayList<Document> documents2 = new ArrayList<>();
         actualUser.setDocuments(documents2);
         actualUser.setEmail("jane.doe@example.org");

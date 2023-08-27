@@ -4,15 +4,19 @@ import com.asledz.kancelaria_prawnicza.exception.ForbiddenException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import org.apache.catalina.connector.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.DelegatingServletInputStream;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
@@ -36,19 +40,28 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-@ExtendWith(SystemStubsExtension.class)
+@ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class CustomAuthorizationFilterTest {
 
     @SystemStub
     private EnvironmentVariables environmentVariables;
+    @Mock
+    private UserDetailsService userDetailsService;
+
+    private final Clock clock = Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+
+    private CustomAuthorizationFilter customAuthorizationFilter;
+
+    @BeforeEach
+    public void setup() {
+        customAuthorizationFilter = new CustomAuthorizationFilter(clock, userDetailsService);
+    }
 
     /**
      * Method under test: {@link CustomAuthorizationFilter#doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain)}
      */
     @Test
-    void testDoFilterInternalWithBadToken() throws IOException, ServletException {
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(
-                Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC));
+    void testDoFilterInternalWithBadToken() {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath((String) "/documents");
@@ -56,7 +69,6 @@ class CustomAuthorizationFilterTest {
         request.addHeader(AUTHORIZATION, authHeader);
         Response response = new Response();
         FilterChain filterChain = mock(FilterChain.class);
-        doNothing().when(filterChain).doFilter(Mockito.<ServletRequest>any(), Mockito.<ServletResponse>any());
         environmentVariables.set("SECRETKEY", "SECRETKEY");
         assertThatThrownBy(() -> customAuthorizationFilter.doFilterInternal(request, response, filterChain))
                 .isInstanceOf(ForbiddenException.class);
@@ -67,9 +79,6 @@ class CustomAuthorizationFilterTest {
      */
     @Test
     void testDoFilterInternalWithToken() throws IOException, ServletException {
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(
-                Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC));
-
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath((String) "/documents");
         environmentVariables.set("SECRETKEY", "SECRETKEY");
@@ -87,7 +96,7 @@ class CustomAuthorizationFilterTest {
         Response response = new Response();
         FilterChain filterChain = mock(FilterChain.class);
         doNothing().when(filterChain).doFilter(Mockito.<ServletRequest>any(), Mockito.<ServletResponse>any());
-
+        when(userDetailsService.loadUserByUsername(any())).thenReturn(user);
         environmentVariables.set("SECRETKEY", "SECRETKEY");
         customAuthorizationFilter.doFilterInternal(request, response, filterChain);
         verify(filterChain).doFilter(Mockito.<ServletRequest>any(), Mockito.<ServletResponse>any());
@@ -99,8 +108,6 @@ class CustomAuthorizationFilterTest {
      */
     @Test
     void testDoFilterInternalWithoutToken() throws IOException, ServletException {
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(
-                Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC));
         MockHttpServletRequest request = new MockHttpServletRequest();
         Response response = new Response();
         FilterChain filterChain = mock(FilterChain.class);
@@ -114,8 +121,6 @@ class CustomAuthorizationFilterTest {
      */
     @Test
     void testDoFilterInternalToLoginPage() throws IOException, ServletException {
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(
-                Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC));
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath((String) "/login");
@@ -152,8 +157,7 @@ class CustomAuthorizationFilterTest {
      */
     @Test
     void testDoFilterInternalToRefreshToken() throws IOException, ServletException {
-        CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(
-                Clock.fixed(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC));
+
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServletPath((String) "/token/refresh");
