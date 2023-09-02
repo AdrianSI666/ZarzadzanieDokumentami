@@ -168,7 +168,6 @@ public class DocumentService {
         CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("owner_id",
                 ":",
                 userId));
-        List<Document> documents = documentRepository.findAll(documentsByUserId);
-        return documents.stream().filter(document -> document.getDate() == null).map(mapper::map).toList();
+        return documentRepository.findAll(documentsByUserId).stream().filter(document -> document.getDate() == null).map(mapper::map).toList();
     }
 }
