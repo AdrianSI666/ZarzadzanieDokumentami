@@ -30,8 +30,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +42,6 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 @Service
 @Transactional
 public class DocumentService {
-    @PersistenceContext
-    private final EntityManager entityManager;
     private final DocumentRepository documentRepository;
     private final TypeService typeService;
     private final DTOMapper<Document, DocumentDTO> mapper;
