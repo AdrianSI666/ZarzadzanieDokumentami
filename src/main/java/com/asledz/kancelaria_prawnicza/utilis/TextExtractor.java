@@ -39,7 +39,6 @@ public class TextExtractor {
         log.info("Processing content type: %s".formatted(contentType));
         String textData;
         MimeType mimeType = MimeType.valueOfMimeType(contentType);
-        log.info(String.valueOf(mimeType));
         switch (mimeType != null ? mimeType : NULL) {
             case DOC -> {
                 POIFSFileSystem fs = new POIFSFileSystem(inputStream);
