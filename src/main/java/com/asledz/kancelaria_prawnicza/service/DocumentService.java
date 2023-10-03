@@ -119,15 +119,14 @@ public class DocumentService {
                         File.class)
                 .setFirstResult(pageSize * page)
                 .setMaxResults(pageSize);
+        List<SortField> sortFields;
         if (!filterAndSortParameters.sortFields().isEmpty()) {
-            List<SortField> sortFields = filterAndSortParameters.sortFields();
-            org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
-            fullTextQuery.setSort(sort);
+            sortFields = filterAndSortParameters.sortFields();
         } else {
-            List<SortField> sortFields = List.of(new SortField("document.documentId", SortField.Type.LONG, true));
-            org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
-            fullTextQuery.setSort(sort);
+            sortFields = List.of(new SortField("document.documentId", SortField.Type.LONG, true));
         }
+        org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
+        fullTextQuery.setSort(sort);
         @SuppressWarnings("unchecked")
         List<File> files = fullTextQuery.getResultList();
         Page<Document> documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());

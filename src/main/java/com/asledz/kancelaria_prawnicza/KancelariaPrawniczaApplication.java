@@ -25,6 +25,7 @@ public class KancelariaPrawniczaApplication {
         int strength = 10;
         return new BCryptPasswordEncoder(strength, new SecureRandom());
     }
+    
     //Command runner to add user/role
     /*@Bean
     CommandLineRunner runner(UserService userService,

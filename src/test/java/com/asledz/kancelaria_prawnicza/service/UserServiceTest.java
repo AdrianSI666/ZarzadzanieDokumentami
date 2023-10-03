@@ -6,6 +6,7 @@ import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.NewUserDTO;
 import com.asledz.kancelaria_prawnicza.dto.UserAuthorities;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
+import com.asledz.kancelaria_prawnicza.exception.LoginException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.helper.DataToPage;
 import com.asledz.kancelaria_prawnicza.mapper.UserDTOMapper;
@@ -39,8 +40,7 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 import static com.asledz.kancelaria_prawnicza.service.UserService.USER_NOT_FOUND_MSG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -331,11 +331,11 @@ class UserServiceTest {
      */
     @Test
     void testDeleteUser() {
-
-        userService.deleteUser(1L);
         given(userRepository.findById(1L)).willReturn(Optional.ofNullable(user));
 
-        verify(userRepository).deleteById(Mockito.<Long>any());
+        userService.deleteUser(1L);
+
+        assertFalse(user.getEnabled());
     }
 
     /**
@@ -401,6 +401,7 @@ class UserServiceTest {
         when(user.getEmail()).thenReturn("jane.doe@example.org");
         when(user.getPassword()).thenReturn("iloveyou");
         when(user.getRoles()).thenReturn(new ArrayList<>());
+        when(user.getEnabled()).thenReturn(true);
         doNothing().when(user).setDocuments(Mockito.<Collection<Document>>any());
         doNothing().when(user).setEmail(Mockito.<String>any());
         doNothing().when(user).setId(Mockito.<Long>any());
@@ -443,7 +444,7 @@ class UserServiceTest {
      * Method under test: {@link UserService#loadUserByUsername(String)}
      */
     @Test
-    void testLoadUserByUsername5() {
+    void testLoadUserByUsernameThrowsLoginException() {
         Role role = new Role();
         role.setId(1L);
         role.setName("email");
@@ -455,13 +456,8 @@ class UserServiceTest {
         when(user.getEmail()).thenReturn("jane.doe@example.org");
         when(user.getPassword()).thenReturn("iloveyou");
         when(user.getRoles()).thenReturn(roleList);
-        doNothing().when(user).setDocuments(Mockito.<Collection<Document>>any());
-        doNothing().when(user).setEmail(Mockito.<String>any());
-        doNothing().when(user).setId(Mockito.<Long>any());
-        doNothing().when(user).setName(Mockito.<String>any());
-        doNothing().when(user).setPassword(Mockito.<String>any());
-        doNothing().when(user).setRoles(Mockito.<Collection<Role>>any());
-        doNothing().when(user).setSurname(Mockito.<String>any());
+        when(user.getEnabled()).thenReturn(false);
+
         user.setDocuments(new ArrayList<>());
         user.setEmail("jane.doe@example.org");
         user.setId(1L);
@@ -472,25 +468,10 @@ class UserServiceTest {
         user.setEnabled(true);
         Optional<User> ofResult = Optional.of(user);
         when(userRepository.findOne(Mockito.<Specification<User>>any())).thenReturn(ofResult);
-        UserDetails actualLoadUserByUsernameResult = userService.loadUserByUsername("jane.doe@example.org");
-        assertEquals(1, actualLoadUserByUsernameResult.getAuthorities().size());
-        assertTrue(actualLoadUserByUsernameResult.isEnabled());
-        assertTrue(actualLoadUserByUsernameResult.isCredentialsNonExpired());
-        assertTrue(actualLoadUserByUsernameResult.isAccountNonLocked());
-        assertTrue(actualLoadUserByUsernameResult.isAccountNonExpired());
-        assertEquals("jane.doe@example.org", actualLoadUserByUsernameResult.getUsername());
-        assertEquals("iloveyou", actualLoadUserByUsernameResult.getPassword());
+        assertThatThrownBy(() -> userService.loadUserByUsername(user.getEmail()))
+                .isInstanceOf(LoginException.class)
+                .hasMessageContaining("Given user with email %s have his account disabled, but tried to log in".formatted(user.getEmail()));
         verify(userRepository).findOne(Mockito.<Specification<User>>any());
-        verify(user).getEmail();
-        verify(user).getPassword();
-        verify(user).getRoles();
-        verify(user).setDocuments(Mockito.<Collection<Document>>any());
-        verify(user).setEmail(Mockito.<String>any());
-        verify(user).setId(Mockito.<Long>any());
-        verify(user).setName(Mockito.<String>any());
-        verify(user).setPassword(Mockito.<String>any());
-        verify(user).setRoles(Mockito.<Collection<Role>>any());
-        verify(user).setSurname(Mockito.<String>any());
     }
 
     /**
@@ -515,6 +496,7 @@ class UserServiceTest {
         when(user.getEmail()).thenReturn("jane.doe@example.org");
         when(user.getPassword()).thenReturn("iloveyou");
         when(user.getRoles()).thenReturn(roleList);
+        when(user.getEnabled()).thenReturn(true);
         doNothing().when(user).setDocuments(Mockito.<Collection<Document>>any());
         doNothing().when(user).setEmail(Mockito.<String>any());
         doNothing().when(user).setId(Mockito.<Long>any());

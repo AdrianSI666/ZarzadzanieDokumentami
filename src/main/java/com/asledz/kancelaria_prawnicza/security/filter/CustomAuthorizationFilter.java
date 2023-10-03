@@ -49,7 +49,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    log.info("[AccessGranted] User: {}", username);
                     filterChain.doFilter(request, response);
                 } catch (JWTVerificationException e) {
                     throw new ForbiddenException("Error somebody gave bad token to get resources with exception: %s At %s.".formatted(e.getMessage(), clock.instant().toString()));

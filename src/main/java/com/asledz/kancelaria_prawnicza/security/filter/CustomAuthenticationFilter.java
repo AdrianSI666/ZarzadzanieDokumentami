@@ -44,7 +44,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
             Map<String, String> map = mapper.readValue(body.readLine(), Map.class);
             email = map.get("email");
             password = map.get("password");
-            log.info("Somebody tried to log in: {} with pass {}", email, password);
         } catch (IOException e) {
             log.info("Somebody tried to log in with wrong data structure: {}", e.getMessage());
             throw new LoginException(e.getMessage(), e);

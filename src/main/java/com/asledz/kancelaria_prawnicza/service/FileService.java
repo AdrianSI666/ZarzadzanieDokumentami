@@ -45,10 +45,12 @@ public class FileService {
         try {
             byte[] bytesOfFile = multipartFile.getBytes();
             String fileName = multipartFile.getOriginalFilename();
-            if (fileName != null) {
-                fileName = StringUtils.cleanPath(fileName);
-            } else {
+            if (fileName == null) {
                 fileName = "No name.txt";
+            } else if (fileName.isBlank()) {
+                fileName = "No name.txt";
+            } else {
+                fileName = StringUtils.cleanPath(fileName);
             }
             String originalFileName = fileName;
             if (fileName.lastIndexOf(".") != -1) {

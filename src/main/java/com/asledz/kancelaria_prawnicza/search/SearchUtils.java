@@ -17,6 +17,10 @@ import java.io.IOException;
 public class SearchUtils {
     private final EntityManager entityManager;
 
+    public FullTextEntityManager getFullTextEntityManager() {
+        return Search.getFullTextEntityManager(entityManager);
+    }
+
     public QueryBuilder getQueryBuilder(FullTextEntityManager fullTextEntityManager,
                                         Class<?> targetClass) {
         return fullTextEntityManager.getSearchFactory()
@@ -24,11 +28,7 @@ public class SearchUtils {
                 .forEntity(targetClass)
                 .get();
     }
-
-    public FullTextEntityManager getFullTextEntityManager() {
-        return Search.getFullTextEntityManager(entityManager);
-    }
-
+    
     public boolean iSearchPossibleOrAlreadyFilteredByAnalyzer(
             Class<?> entity,
             String fieldName,
