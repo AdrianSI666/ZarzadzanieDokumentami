@@ -5,7 +5,9 @@ import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.domain.Type;
 import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
+import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import com.asledz.kancelaria_prawnicza.enums.SortEnum;
+import com.asledz.kancelaria_prawnicza.exception.ForbiddenException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.helper.DataToPage;
 import com.asledz.kancelaria_prawnicza.mapper.DocumentDTOMapper;
@@ -56,6 +58,8 @@ class DocumentServiceTest {
     private DocumentRepository documentRepository;
     @Mock
     private TypeService typeService;
+    @Mock
+    private UserService userService;
     @InjectMocks
     private DocumentService documentService;
     Document.DocumentBuilder documentBuilder = DocumentMother.basic(Clock.systemUTC().instant());
@@ -318,7 +322,7 @@ class DocumentServiceTest {
     }
 
     /**
-     * Method under test: {@link DocumentService#updateDocument(DocumentDTO, Long)}
+     * Method under test: {@link DocumentService#updateDocument(DocumentDTO, Long, String)}
      */
     @Test
     void testUpdateDocument() throws UnsupportedEncodingException {
@@ -464,13 +468,14 @@ class DocumentServiceTest {
         type5.setId(1L);
         type5.setName("Name");
         when(typeService.getTypeById(Mockito.<Long>any())).thenReturn(type5);
+        when(userService.getUserByEmail(anyString())).thenReturn(UserDTO.builder().id(1L).build());
         DocumentDTO documentDTO = new DocumentDTO(1L, "Dr",
                 LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), 10.0d, true, 1L, "Name");
 
         assertEquals(documentDTO,
                 documentService.updateDocument(new DocumentDTO(1L, "Dr",
                                 LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), 10.0d, true, 1L, "Name"),
-                        1L));
+                        1L, anyString()));
         verify(documentRepository).save(Mockito.<Document>any());
         verify(documentRepository).findById(Mockito.<Long>any());
         verify(typeService).getTypeById(Mockito.<Long>any());
@@ -478,25 +483,46 @@ class DocumentServiceTest {
     }
 
     /**
-     * Method under test: {@link DocumentService#updateDocument(DocumentDTO, Long)}
+     * Method under test: {@link DocumentService#updateDocument(DocumentDTO, Long, String)}
      */
     @Test
     void testUpdateDocumentThrowNotFound() {
         Long id = 1L;
         given(documentRepository.findById(id)).willReturn(Optional.empty());
-        assertThatThrownBy(() -> documentService.updateDocument(any(DocumentDTO.class), id))
+
+        assertThatThrownBy(() -> documentService.updateDocument(any(DocumentDTO.class), id, "user1"))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining(String.format(DOCUMENT_NOT_FOUND_MSG, id));
     }
 
     /**
-     * Method under test: {@link DocumentService#deleteDocument(Long)}
+     * Method under test: {@link DocumentService#deleteDocument(Long, String)}
      */
     @Test
     void testDeleteDocument() {
         doNothing().when(documentRepository).deleteById(Mockito.<Long>any());
-        documentService.deleteDocument(1L);
-        verify(documentRepository).deleteById(Mockito.<Long>any());
+
+        given(documentRepository.findById(1L)).willReturn(Optional.ofNullable(
+                documentBuilder.id(1L).owner(
+                        User.builder().id(1L).email("user1").build()).build()));
+        when(userService.getUserByEmail("user1")).thenReturn(UserDTO.builder().id(1L).build());
+
+        documentService.deleteDocument(1L, "user1");
+        verify(documentRepository).delete(any());
+    }
+
+    @Test
+    void testDeleteDocumentThrowsForbidden() {
+        doNothing().when(documentRepository).deleteById(Mockito.<Long>any());
+
+        given(documentRepository.findById(1L)).willReturn(Optional.ofNullable(
+                documentBuilder.id(1L).owner(
+                        User.builder().id(1L).email("user1").build()).build()));
+
+        given(userService.getUserByEmail("user2")).willReturn(UserDTO.builder().id(2L).build());
+
+        assertThatThrownBy(() -> documentService.deleteDocument(1L, "user2"))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.asledz.kancelaria_prawnicza.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,6 +58,6 @@ public class FileController {
         fileService.addFile(formData, id);
         //Without this line tomcat doesn't delete temp upload file if worked with Gotenberg service
         System.gc();
-        return ResponseEntity.ok().body("Success");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Success");
     }
 }

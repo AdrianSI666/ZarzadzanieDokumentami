@@ -98,6 +98,8 @@ public class UserService implements UserDetailsService {
                 () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         oldUser.setName(updatedUserInformation.name());
         oldUser.setSurname(updatedUserInformation.surname());
+        if (updatedUserInformation.email() != null && !updatedUserInformation.email().isBlank())
+            oldUser.setEmail(updatedUserInformation.email());
         return mapper.map(userRepository.save(oldUser));
     }
 

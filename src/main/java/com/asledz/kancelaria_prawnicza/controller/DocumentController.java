@@ -7,6 +7,8 @@ import com.asledz.kancelaria_prawnicza.utilis.Converter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,12 +36,21 @@ public class DocumentController {
     /**
      * Endpoint to get page containing Documents data
      *
-     * @param pageProperties - map with:
-     *                       page : number of page that you want to get
-     *                       pageSize : numbers of items per page
-     *                       sortParams: key values to sort by with boolean if they're reversed or not
-     * @return ResponseEntity with body containing Map of "data" - List of Documents
+     * @param pageProperties map with:
+     *                       <p>
+     *                       page : number of page that you want to get;
+     *                       <p>
+     *                       pageSize : numbers of items per page;
+     *                       <p>
+     *                       sortParams: key values to sort by with boolean if they're reversed or not.
+     *                       Available options of sorting can be found in
+     *                       enum class {@link  com.asledz.kancelaria_prawnicza.enums.SortEnum  SortEnum}
+     * @return ResponseEntity with body containing Map of:
+     * <p>
+     * "data" - List of Documents
+     * <p>
      * "currentPage" - current page which was given
+     * <p>
      * "totalPages" - total number of pages that you can get
      */
     @GetMapping()
@@ -58,6 +69,19 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.getDocumentById(id));
     }
 
+    /**
+     * Endpoint to get Documents filtered by parameters.
+     *
+     * @param filterParameters MultiValueMap of parameters to filter by. Available options of filtering can be found in
+     *                         enum class {@link  com.asledz.kancelaria_prawnicza.enums.FilterAndSortEnum  FilterAndSortEnum}
+     * @return ResponseEntity with body containing Map of:
+     * <p>
+     * "data" - List of Documents
+     * <p>
+     * "currentPage" - current page which was given
+     * <p>
+     * "totalPages" - total number of pages that you can get
+     */
     @GetMapping("/by")
     public ResponseEntity<Map<String, Object>> getDocumentsByParameters(@RequestParam MultiValueMap<String, String> filterParameters) {
         return ResponseEntity.ok().body(converter.convertDataFromPageToMap(documentService.getDocumentsByParameters(filterParameters)));
@@ -72,7 +96,8 @@ public class DocumentController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<DocumentDTO> updateDocument(@PathVariable Long id, @RequestBody DocumentDTO documentDTO) {
-        return ResponseEntity.ok().body(documentService.updateDocument(documentDTO, id));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok().body(documentService.updateDocument(documentDTO, id, authentication.getName()));
     }
 
     /**
@@ -83,10 +108,17 @@ public class DocumentController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDocument(@PathVariable Long id) {
-        documentService.deleteDocument(id);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        documentService.deleteDocument(id, authentication.getName());
         return ResponseEntity.ok().body("Success");
     }
 
+    /**
+     * Endpoint to find documents without specified dates, created by given user.
+     *
+     * @param id of owner of documents you want to find.
+     * @return ResponseEntity with body containing List of Documents information.
+     */
     @GetMapping("/user/{id}/withoutDate")
     public ResponseEntity<List<DocumentDTO>> getDocumentsWithoutDate(@PathVariable Long id) {
         return ResponseEntity.ok().body(documentService.getDocumentsByUserIdWithoutDate(id));

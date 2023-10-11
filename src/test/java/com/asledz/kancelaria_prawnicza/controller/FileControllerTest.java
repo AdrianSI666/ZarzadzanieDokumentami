@@ -33,7 +33,7 @@ class FileControllerTest {
      */
     @Test
     void testDownloadFile() throws Exception {
-        FileDTO fileDTO = new FileDTO(1L, "Name", "text/plain", "AXAXAXAX".getBytes("UTF-8"));
+        FileDTO fileDTO = new FileDTO(1L, "Name", "text/plain", "AXAPTA".getBytes("UTF-8"));
         when(fileService.getFileById(Mockito.<Long>any()))
                 .thenReturn(fileDTO);
         MockHttpServletRequestBuilder requestBuilder =
@@ -71,7 +71,7 @@ class FileControllerTest {
         MockMvcBuilders.standaloneSetup(fileController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.content().string("Success"));
     }

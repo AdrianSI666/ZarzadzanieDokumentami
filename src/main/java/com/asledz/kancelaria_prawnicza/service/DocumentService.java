@@ -3,9 +3,12 @@ package com.asledz.kancelaria_prawnicza.service;
 import com.asledz.kancelaria_prawnicza.domain.Document;
 import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.domain.Type;
+import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
+import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
+import com.asledz.kancelaria_prawnicza.exception.ForbiddenException;
 import com.asledz.kancelaria_prawnicza.exception.NotFoundException;
 import com.asledz.kancelaria_prawnicza.mapper.DTOMapper;
 import com.asledz.kancelaria_prawnicza.repository.DocumentRepository;
@@ -33,6 +36,7 @@ import org.springframework.util.MultiValueMap;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
@@ -44,6 +48,7 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 public class DocumentService {
     private final DocumentRepository documentRepository;
     private final TypeService typeService;
+    private final UserService userService;
     private final DTOMapper<Document, DocumentDTO> mapper;
     private final SearchUtils searchUtils;
     protected static final String DOCUMENT_NOT_FOUND_MSG = "Couldn't find document with id: %d";
@@ -133,24 +138,34 @@ public class DocumentService {
         return documentPage.map(mapper::map);
     }
 
-    public DocumentDTO updateDocument(DocumentDTO updatedDocumentInformation, Long documentId) {
+    public DocumentDTO updateDocument(DocumentDTO updatedDocumentInformation, Long documentId, String username) {
         log.info("Updating document with id: %d".formatted(documentId));
         Document oldDocument = documentRepository.findById(documentId).orElseThrow(
                 () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, documentId)));
-        if (updatedDocumentInformation.typeId() > 0) {
+        UserDTO userDTO = userService.getUserByEmail(username);
+        if (!Objects.equals(userDTO.id(), oldDocument.getOwner().getId()))
+            throw new ForbiddenException("Logged in user is not owner of document and can't change it's data. Document id: %s and UserId: %s"
+                    .formatted(documentId, userDTO.id()));
+        if (updatedDocumentInformation.typeId() != null && updatedDocumentInformation.typeId() > 0) {
             Type type = typeService.getTypeById(updatedDocumentInformation.typeId());
             oldDocument.setType(type);
         }
-        oldDocument.setTitle(updatedDocumentInformation.title());
-        oldDocument.setDate(updatedDocumentInformation.date());
-        oldDocument.setCost(updatedDocumentInformation.cost());
-        oldDocument.setPaid(updatedDocumentInformation.paid());
+        if (updatedDocumentInformation.title() != null) oldDocument.setTitle(updatedDocumentInformation.title());
+        if (updatedDocumentInformation.date() != null) oldDocument.setDate(updatedDocumentInformation.date());
+        if (updatedDocumentInformation.cost() != null) oldDocument.setCost(updatedDocumentInformation.cost());
+        if (updatedDocumentInformation.paid() != null) oldDocument.setPaid(updatedDocumentInformation.paid());
         return mapper.map(documentRepository.save(oldDocument));
     }
 
-    public void deleteDocument(Long documentId) {
+    public void deleteDocument(Long documentId, String username) {
         log.info("Deleting Document with id: %d".formatted(documentId));
-        documentRepository.deleteById(documentId);
+        Document document = documentRepository.findById(documentId).orElseThrow(
+                () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, documentId)));
+        UserDTO userDTO = userService.getUserByEmail(username);
+        if (!Objects.equals(userDTO.id(), document.getOwner().getId()))
+            throw new ForbiddenException("Logged in user is not owner of document so can't delete this document. Document id: %s and UserId: %s"
+                    .formatted(documentId, userDTO.id()));
+        documentRepository.delete(document);
     }
 
     /**

@@ -99,7 +99,7 @@ class UserControllerTest {
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().string(objectMapper.writeValueAsString(userDTO)));
     }
 

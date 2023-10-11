@@ -1,0 +1,45 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+  port: 8091
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kancelariatests
+    username: ${DBUSERNAME}
+    password: ${DBPASSWORD}
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    #    show-sql: true
+    properties:
+      database: postgresql
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        #        format_sql: true
+        search:
+          default: # <- This is the index name
+            directory_provider: filesystem
+            indexBase: ./data/index
+            index-manager: directory-based
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+      enabled: true
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    org:
+      hibernate:
+#        SQL: DEBUG
+#        type:
+#          descriptor:
+#            sql:
+#              BasicBinder: TRACE

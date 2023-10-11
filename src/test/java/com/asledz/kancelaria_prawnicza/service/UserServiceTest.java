@@ -317,7 +317,6 @@ class UserServiceTest {
         verify(userRepository).save(Mockito.<User>any());
         verify(userRepository).findById(Mockito.<Long>any());
         verify(user).setDocuments(Mockito.<Collection<Document>>any());
-        verify(user).setEmail(Mockito.<String>any());
         verify(user).setId(Mockito.<Long>any());
         verify(user, atLeast(1)).setName(Mockito.<String>any());
         verify(user).setPassword(Mockito.<String>any());

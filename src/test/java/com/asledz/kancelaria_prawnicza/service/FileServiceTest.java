@@ -181,7 +181,6 @@ class FileServiceTest {
                 bytes
         );
         long userId = owner.getId();
-
         given(userRepository.findById(userId)).willReturn(Optional.ofNullable(owner));
         given(typeRepository.findById(0L)).willReturn(
                 Optional.ofNullable(type));

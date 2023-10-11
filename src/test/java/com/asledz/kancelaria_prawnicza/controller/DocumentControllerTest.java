@@ -5,6 +5,7 @@ import com.asledz.kancelaria_prawnicza.service.DocumentService;
 import com.asledz.kancelaria_prawnicza.utilis.Converter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,6 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -28,6 +32,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {DocumentController.class})
@@ -81,37 +86,27 @@ class DocumentControllerTest {
      */
     @Test
     void testUpdateDocument4() {
-        //   Diffblue Cover was unable to write a Spring test,
-        //   so wrote a non-Spring test instead.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.Instant` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: com.asledz.kancelaria_prawnicza.dto.DocumentDTO["date"])
-        //       at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:77)
-        //       at com.fasterxml.jackson.databind.SerializerProvider.reportBadDefinition(SerializerProvider.java:1300)
-        //       at com.fasterxml.jackson.databind.ser.impl.UnsupportedTypeSerializer.serialize(UnsupportedTypeSerializer.java:35)
-        //       at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:728)
-        //       at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:774)
-        //       at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:178)
-        //       at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:480)
-        //       at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:319)
-        //       at com.fasterxml.jackson.databind.ObjectMapper._writeValueAndClose(ObjectMapper.java:4568)
-        //       at com.fasterxml.jackson.databind.ObjectMapper.writeValueAsString(ObjectMapper.java:3821)
-        //   See https://diff.blue/R013 to resolve this issue.
-
         DocumentService documentService = mock(DocumentService.class);
-        when(documentService.updateDocument(Mockito.<DocumentDTO>any(), Mockito.<Long>any())).thenReturn(
+        when(documentService.updateDocument(Mockito.<DocumentDTO>any(), Mockito.<Long>any(), anyString())).thenReturn(
                 new DocumentDTO(1L, "Dr", LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), 10.0d,
                         true, 1L, "Type Name"));
         DocumentController documentController = new DocumentController(documentService, new Converter());
         DocumentDTO documentDTO = new DocumentDTO(1L, "Dr",
                 LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant(), 10.0d, true, 1L, "Type Name");
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        given(authentication.getName()).willReturn("user1");
+        given(securityContext.getAuthentication()).willReturn(authentication);
 
-        ResponseEntity<DocumentDTO> actualUpdateDocumentResult = documentController.updateDocument(1L, documentDTO);
-        assertEquals(documentDTO, actualUpdateDocumentResult.getBody());
-        assertTrue(actualUpdateDocumentResult.getHeaders().isEmpty());
-        assertEquals(HttpStatus.OK, actualUpdateDocumentResult.getStatusCode());
-        verify(documentService).updateDocument(Mockito.<DocumentDTO>any(), Mockito.<Long>any());
+        try (MockedStatic<SecurityContextHolder> securityContextHolder = Mockito.mockStatic(SecurityContextHolder.class)) {
+            securityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            ResponseEntity<DocumentDTO> actualUpdateDocumentResult = documentController.updateDocument(1L, documentDTO);
+            assertEquals(documentDTO, actualUpdateDocumentResult.getBody());
+            assertTrue(actualUpdateDocumentResult.getHeaders().isEmpty());
+            assertEquals(HttpStatus.OK, actualUpdateDocumentResult.getStatusCode());
+
+            verify(documentService).updateDocument(Mockito.<DocumentDTO>any(), Mockito.<Long>any(), anyString());
+        }
     }
 
     /**
@@ -119,14 +114,24 @@ class DocumentControllerTest {
      */
     @Test
     void testDeleteDocument() throws Exception {
-        doNothing().when(documentService).deleteDocument(Mockito.<Long>any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/documents/{id}", 1L);
-        MockMvcBuilders.standaloneSetup(documentController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("text/plain;charset=ISO-8859-1"))
-                .andExpect(MockMvcResultMatchers.content().string("Success"));
+        doNothing().when(documentService).deleteDocument(Mockito.<Long>any(), anyString());
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        given(authentication.getName()).willReturn("user1");
+        given(securityContext.getAuthentication()).willReturn(authentication);
+
+        try (MockedStatic<SecurityContextHolder> securityContextHolder = Mockito.mockStatic(SecurityContextHolder.class)) {
+            securityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+            MockMvcBuilders.standaloneSetup(documentController)
+                    .build()
+                    .perform(requestBuilder)
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().contentType("text/plain;charset=ISO-8859-1"))
+                    .andExpect(MockMvcResultMatchers.content().string("Success"));
+        }
     }
 
     /**
@@ -134,15 +139,23 @@ class DocumentControllerTest {
      */
     @Test
     void testDeleteDocument2() throws Exception {
-        doNothing().when(documentService).deleteDocument(Mockito.<Long>any());
+        doNothing().when(documentService).deleteDocument(Mockito.<Long>any(), anyString());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/documents/{id}", 1L);
         requestBuilder.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(documentController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("text/plain;charset=ISO-8859-1"))
-                .andExpect(MockMvcResultMatchers.content().string("Success"));
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        given(authentication.getName()).willReturn("user1");
+        given(securityContext.getAuthentication()).willReturn(authentication);
+
+        try (MockedStatic<SecurityContextHolder> securityContextHolder = Mockito.mockStatic(SecurityContextHolder.class)) {
+            securityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+            MockMvcBuilders.standaloneSetup(documentController)
+                    .build()
+                    .perform(requestBuilder)
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().contentType("text/plain;charset=ISO-8859-1"))
+                    .andExpect(MockMvcResultMatchers.content().string("Success"));
+        }
     }
 
     /**
