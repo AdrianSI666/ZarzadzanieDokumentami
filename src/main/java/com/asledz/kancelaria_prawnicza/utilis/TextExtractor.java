@@ -36,7 +36,7 @@ public class TextExtractor {
      * @throws IOException if there was error while reading from inputStream.
      */
     public static String extractTextFromFile(InputStream inputStream, String contentType, String fileName) throws IOException {
-        log.info("Processing content type: %s".formatted(contentType));
+        //log.info("Processing content type: %s".formatted(contentType));
         String textData;
         MimeType mimeType = MimeType.valueOfMimeType(contentType);
         switch (mimeType != null ? mimeType : NULL) {

@@ -34,13 +34,18 @@ public class QueriesGenerator {
                     String prompt = values.get(0);
                     if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, TEXT.path, prompt)) {
                         filterQueries.add(queryBuilder
-                                .keyword()
+                                .phrase()
+                                .withSlop(1)
+                                .onField(TEXT.path)
+                                .sentence(prompt)
+                                .createQuery());
+                                /*.keyword() //phrase is better to use on long texts, rather than keyword.
                                 .fuzzy()
                                 .withEditDistanceUpTo(2)
                                 .withPrefixLength(1)
                                 .onFields(TEXT.path).andField(TITLE.path)
                                 .matching(prompt)
-                                .createQuery());
+                                .createQuery());*/
                     } else {
                         throw new BadRequestException("Couldn't use hibernate search on text field: %s with given prompt: %s"
                                 .formatted(FILTER_TEXT.value, values.toString()));

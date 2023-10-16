@@ -177,11 +177,12 @@ class DocumentControllerTest {
     }
 
     /**
-     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long)}
+     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsWithoutDate() throws Exception {
-        when(documentService.getDocumentsByUserIdWithoutDate(Mockito.<Long>any())).thenReturn(new ArrayList<>());
+        when(documentService.getDocumentsByUserIdWithoutDate(anyLong(), anyInt())).thenReturn(new PageImpl<>(new ArrayList<>()));
+        when(converter.convertDataFromPageToMap(Mockito.<Page<Object>>any())).thenReturn(new HashMap<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate", 1L);
         MockMvcBuilders.standaloneSetup(documentController)
                 .build()
@@ -192,11 +193,12 @@ class DocumentControllerTest {
     }
 
     /**
-     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long)}
+     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsWithoutDate2() throws Exception {
-        when(documentService.getDocumentsByUserIdWithoutDate(Mockito.<Long>any())).thenReturn(new ArrayList<>());
+        when(documentService.getDocumentsByUserIdWithoutDate(anyLong(), anyInt())).thenReturn(new PageImpl<>(new ArrayList<>()));
+        when(converter.convertDataFromPageToMap(Mockito.<Page<Object>>any())).thenReturn(new HashMap<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate", 1L);
         requestBuilder.characterEncoding("Encoding");
         MockMvcBuilders.standaloneSetup(documentController)

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -119,9 +118,9 @@ public class DocumentController {
      * @param id of owner of documents you want to find.
      * @return ResponseEntity with body containing List of Documents information.
      */
-    @GetMapping("/user/{id}/withoutDate")
-    public ResponseEntity<List<DocumentDTO>> getDocumentsWithoutDate(@PathVariable Long id) {
-        return ResponseEntity.ok().body(documentService.getDocumentsByUserIdWithoutDate(id));
+    @GetMapping("/user/{id}/withoutDate/{page}")
+    public ResponseEntity<Map<String, Object>> getDocumentsByUserIdWithoutDate(@PathVariable Long id, @PathVariable Integer page) {
+        return ResponseEntity.ok().body(converter.convertDataFromPageToMap(documentService.getDocumentsByUserIdWithoutDate(id, page)));
     }
 
 }

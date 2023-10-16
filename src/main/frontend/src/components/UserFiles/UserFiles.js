@@ -148,7 +148,6 @@ const UserFiles = () => {
         })
         .then(res => {
           setFileInfos(res.data.data)
-          setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
         }).catch(() => {
           setMessage("Wystąpił błąd podczas filtrowania wyników z bazy danych.")
@@ -166,7 +165,6 @@ const UserFiles = () => {
       })
         .then(res => {
           setFileInfos(res.data.data)
-          setPage(res.data.currentPage)
           setTotalPages(res.data.totalPages)
         }).catch(() => {
           setMessage("Wystąpił błąd podczas pobierania plików, spróbuj ponownie za chwilę.")
@@ -190,10 +188,11 @@ const UserFiles = () => {
   }, [page]);
 
   const onDrop = useCallback((acceptedFiles, page) => {
-    Promise.all(acceptedFiles.map((file) => {
+    setMessage("Pliki są przetwarzane na serwerze.")
+    Promise.allSettled(acceptedFiles.map(async (file) => {
       const formData = new FormData();
       formData.append("file", file);
-      axios.post(
+      await axios.post(
         `http://${localHost}:${port}/files/${id}`,
         formData,
         {
@@ -201,17 +200,19 @@ const UserFiles = () => {
             "Content-Type": "multipart/form-data",
             "charset": "utf-8"
           }
-        }).then(() => {
-          setMessage("Plik pomyślnie dodany do bazy oraz zresetowano wyszukiwanie.")
-          getDocuments(page, pageSize, sortParams, filterParams)
         }).catch(() => {
-          setMessage("Wystąpił błąd podczas wysyłania pliku do bazy")
+          setMessage("Wystąpił błąd podczas wysyłania pliku na serwer")
         })
-    }))
-    setMessage("Plik jest wysyłany na serwer.")
-    setTimeout(function () {
-      setMessage(undefined)
-    }, 4000);
+    })).then(()=> {
+      setMessage("Plik pomyślnie dodane do bazy oraz zresetowano wyszukiwanie.")
+      getDocuments(page, pageSize, sortParams, filterParams)
+      setTimeout(function () {
+        setMessage(undefined)
+      }, 4000);
+    }).catch(() => {
+      setMessage("Wystąpił błąd podczas wysyłania plików na serwer")
+    })
+    
   }, [])
 
   function download(e, id, name) {
@@ -509,7 +510,7 @@ const UserFiles = () => {
               let nullFilter = { "filter_owner_id": id }
               getDocuments(1, pageSize, {}, nullFilter)
             }}>
-              Reset wyszukiwania i sortowania
+              Pełny reset wyszukiwania i sortowania
             </Button>
           </Col>
         </Row>
@@ -526,8 +527,7 @@ const UserFiles = () => {
             <option value="5" key={5}>5</option>
             <option value="10" key={10}>10</option>
             <option value="20" key={20}>20</option>
-            <option value="40" key={40}>40</option>
-            <option value="80" key={80}>80</option>
+            <option value="30" key={30}>30</option>
           </Form.Select>
 
         </div>

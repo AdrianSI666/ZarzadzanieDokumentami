@@ -103,9 +103,8 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void testAddUsers() throws Exception {
+    void testAddUser() throws Exception {
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
         requestHeaders.setBearerAuth(token);
 
         MockHttpServletRequestBuilder contentTypeResult = post("/users")
@@ -134,9 +133,9 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void testUpdateUsers() throws Exception {
+    void testUpdateUser() throws Exception {
         HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+
         requestHeaders.setBearerAuth(token);
 
         MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.put("/users/5")
@@ -164,7 +163,7 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void testUpdateUsersButNotEmail() throws Exception {
+    void testUpdateUserButNotEmail() throws Exception {
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
         requestHeaders.setBearerAuth(token);
@@ -193,7 +192,7 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void testDeleteUsers() throws Exception {
+    void testDeleteUser() throws Exception {
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
         requestHeaders.setBearerAuth(token);

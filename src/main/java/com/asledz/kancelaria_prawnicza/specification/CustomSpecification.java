@@ -34,13 +34,14 @@ public class CustomSpecification<T> implements Specification<T>, Serializable {
                 Join<Object, Object> listJoin = root.join(value[0], JoinType.INNER);
                 return builder.equal(listJoin.get(value[1]), criteria.getValue());
             }
+            if (criteria.getValue().equals("null")) {
+                return builder.isNull(root.get(criteria.getKey()));
+            }
             if (root.get(criteria.getKey()).getJavaType() == String.class) {
                 query.orderBy(builder.desc(root.get("id")));
                 return builder.like(
                         root.get(criteria.getKey()), "%" + criteria.getValue() + "%");
-            } else {
-                return builder.equal(root.get(criteria.getKey()), criteria.getValue());
-            }
+            } else return builder.equal(root.get(criteria.getKey()), criteria.getValue());
         }
         return null;
     }

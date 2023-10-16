@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
@@ -173,11 +174,24 @@ public class DocumentService {
      * @return List of documents that given user owns and are not given dates. Used to give
      * user an option to change null values in date.
      */
-    public List<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId) {
-        log.info("Getting documents by ownerId: %d".formatted(userId));
-        CustomSpecification<Document> documentsByUserId = new CustomSpecification<>(new SearchCriteria("owner_id",
+    public Page<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId, Integer page) {
+        if (page == null) page = 1;
+        page--;
+        int pageSize = 25;
+        Specification<Document> documentsByUserId = new CustomSpecification<Document>(new SearchCriteria("owner_id",
                 ":",
-                userId));
-        return documentRepository.findAll(documentsByUserId).stream().filter(document -> document.getDate() == null).map(mapper::map).toList();
+                userId)).and(new CustomSpecification<>(new SearchCriteria("date",
+                ":",
+                "null")));
+        /*CustomSpecification<Document> test = new CustomSpecification<>(new SearchCriteria("date",
+                ":",
+                "null"));
+        var test2 = documentRepository.findAll(test.and(new CustomSpecification<>(new SearchCriteria("owner_id",
+                ":",
+                userId))));
+        var test1 = documentRepository.findAll(documentsByUserId).stream().filter(document -> document.getDate() == null).map(mapper::map).toList();*/
+
+        Pageable paging = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+        return documentRepository.findAll(documentsByUserId, paging).map(mapper::map);
     }
 }

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import inMemoryJWTMenager from '../../services/inMemoryJWTMenager';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Form } from 'react-bootstrap';
+import { Alert, Button, Container, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { loggInMannager, loggInUser } from '../redux/config';
 import jwtDecode from 'jwt-decode';
@@ -47,7 +47,9 @@ const LoginProfile = () => {
   
     return (
       <Container>
-        {loginError===true && <span>Złe dane logowania</span>}
+        {loginError===true && (<Alert key={"danger"} variant={"danger"}>
+          Złe dane logowania
+        </Alert>)}
         <Form onSubmit={(e) => {
           login(e, email, password);
         }}>

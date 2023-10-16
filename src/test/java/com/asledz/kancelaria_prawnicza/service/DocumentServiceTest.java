@@ -44,8 +44,7 @@ import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_NUMBER;
 import static com.asledz.kancelaria_prawnicza.enums.PageProperties.PAGE_SIZE;
 import static com.asledz.kancelaria_prawnicza.service.DocumentService.DOCUMENT_NOT_FOUND_MSG;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -526,17 +525,7 @@ class DocumentServiceTest {
     }
 
     /**
-     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long)}
-     */
-    @Test
-    void testGetDocumentsByUserIdWithoutDate() {
-        when(documentRepository.findAll(Mockito.<Specification<Document>>any())).thenReturn(new ArrayList<>());
-        assertTrue(documentService.getDocumentsByUserIdWithoutDate(1L).isEmpty());
-        verify(documentRepository).findAll(Mockito.<Specification<Document>>any());
-    }
-
-    /**
-     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long)}
+     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsByUserIdWithoutDate2() {
@@ -594,7 +583,6 @@ class DocumentServiceTest {
 
         Document document2 = new Document();
         document2.setCost(10.0d);
-        document2.setDate(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant());
         document2.setFile(file2);
         document2.setId(1L);
         document2.setOwner(owner2);
@@ -604,13 +592,13 @@ class DocumentServiceTest {
 
         ArrayList<Document> documentList = new ArrayList<>();
         documentList.add(document2);
-        when(documentRepository.findAll(Mockito.<Specification<Document>>any())).thenReturn(documentList);
-        assertTrue(documentService.getDocumentsByUserIdWithoutDate(1L).isEmpty());
-        verify(documentRepository).findAll(Mockito.<Specification<Document>>any());
+        when(documentRepository.findAll(Mockito.<Specification<Document>>any(), any(Pageable.class))).thenReturn(new PageImpl<>(new ArrayList<>()));
+        assertTrue(documentService.getDocumentsByUserIdWithoutDate(1L, 1).isEmpty());
+        verify(documentRepository).findAll(Mockito.<Specification<Document>>any(), any(Pageable.class));
     }
 
     /**
-     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long)}
+     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsByUserIdWithoutDate3() {
@@ -741,9 +729,20 @@ class DocumentServiceTest {
         ArrayList<Document> documentList = new ArrayList<>();
         documentList.add(document4);
         documentList.add(document2);
-        when(documentRepository.findAll(Mockito.<Specification<Document>>any())).thenReturn(documentList);
-        assertTrue(documentService.getDocumentsByUserIdWithoutDate(1L).isEmpty());
-        verify(documentRepository).findAll(Mockito.<Specification<Document>>any());
+        when(documentRepository.findAll(Mockito.<Specification<Document>>any(), any(Pageable.class))).thenReturn(new PageImpl<>(documentList));
+        assertFalse(documentService.getDocumentsByUserIdWithoutDate(1L, 1).isEmpty());
+        verify(documentRepository).findAll(Mockito.<Specification<Document>>any(), any(Pageable.class));
+    }
+
+    /**
+     * Method under test: {@link DocumentService#getDocumentsByUserIdWithoutDate(Long, Integer)}
+     */
+    @Test
+    void testGetDocumentsByUserIdWithoutDate4() {
+        when(documentRepository.findAll(Mockito.<Specification<Document>>any(), Mockito.<Pageable>any()))
+                .thenReturn(new PageImpl<>(new ArrayList<>()));
+        assertTrue(documentService.getDocumentsByUserIdWithoutDate(1L, 1).toList().isEmpty());
+        verify(documentRepository).findAll(Mockito.<Specification<Document>>any(), Mockito.<Pageable>any());
     }
 }
 

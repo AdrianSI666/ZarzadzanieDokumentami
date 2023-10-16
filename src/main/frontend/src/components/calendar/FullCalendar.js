@@ -14,6 +14,7 @@ import { Alert, Button, Form, Modal } from 'react-bootstrap'
 
 import "./FullCalendar.css"
 import { Divider, Drawer } from '@material-ui/core'
+import { Pagination } from '@material-ui/lab'
 
 const Calendar = () => {
     const config = useSelector((state) => state.config)
@@ -22,7 +23,14 @@ const Calendar = () => {
     const id = config.user
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    axios.defaults.headers.common["Authorization"] = `Bearer ${inMemoryJWTMenager.getToken()}`;
+    axios.defaults.headers.common["Authorization"] = `Bearer ${inMemoryJWTMenager.getToken()}`
+
+    const [totalPages, setTotalPages] = useState(1)
+    const [page, setPage] = useState(1)
+
+    const handlePageChange = (event, value) => {
+        setPage(value)
+    };
 
     axios.interceptors.request.use(async config => {
         if (inMemoryJWTMenager.getToken() != null && inMemoryJWTMenager.getRefreshToken() != null) {
@@ -111,6 +119,10 @@ const Calendar = () => {
             })
     }, [])
 
+    useEffect(() => {
+        getDocumentsWithoutDate(page)
+      }, [page]);
+
     async function handleDatesSet(data) {
         setDateFromTo(data)
         let range = [new Date(data.start), new Date(data.end)]
@@ -142,16 +154,20 @@ const Calendar = () => {
         }).catch((err) => {
             if (err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
         })
-        axios.get(`http://${localHost}:${port}/documents/user/${id}/withoutDate`)
+    }
+
+    function getDocumentsWithoutDate(page) {
+        axios.get(`http://${localHost}:${port}/documents/user/${id}/withoutDate/${page}`)
             .then(res => {
                 let noDateDoc = []
-                res.data.map(document => {
+                res.data.data.map(document => {
                     let doc = {
                         id: document.id,
                         title: document.title
                     }
                     noDateDoc.push(doc)
                 })
+                setTotalPages(res.data.totalPages)
                 setEventsWithoutDate(noDateDoc)
             }).catch((err) => {
                 if (err.response.status != 403) setMessage("Nie wszystkie wymagane dane z bazy danych udało się pobrać. Spróbuj ponownie.")
@@ -465,6 +481,18 @@ const Calendar = () => {
                 className='box'
             >
                 <h2>Brak daty</h2>
+                <Pagination
+                //className="my-3"
+                size="small"
+                color="primary"
+                count={totalPages}
+                page={page}
+                siblingCount={1}
+                boundaryCount={1}
+                variant="outlined"
+                shape="rounded"
+                onChange={handlePageChange}
+                />
                 {renderEventsWithoutDate}
             </Drawer>
         </>

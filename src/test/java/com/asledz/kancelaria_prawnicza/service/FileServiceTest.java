@@ -128,8 +128,7 @@ class FileServiceTest {
     @Test
     void testAddFile() {
         byte[] bytes = "Hello, World!".getBytes();
-        MockMultipartFile file
-                = new MockMultipartFile(
+        MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "hello.pdf",
                 MediaType.APPLICATION_PDF_VALUE,
@@ -137,8 +136,7 @@ class FileServiceTest {
         );
         long userId = owner.getId();
         given(userRepository.findById(userId)).willReturn(Optional.ofNullable(owner));
-        given(typeRepository.findById(0L)).willReturn(
-                Optional.ofNullable(type));
+        given(typeRepository.findById(0L)).willReturn(Optional.ofNullable(type));
 
         try (MockedStatic<TextExtractor> textExtractor = Mockito.mockStatic(TextExtractor.class)) {
             textExtractor.when(() -> TextExtractor.extractTextFromFile(any(), anyString(), anyString()))
