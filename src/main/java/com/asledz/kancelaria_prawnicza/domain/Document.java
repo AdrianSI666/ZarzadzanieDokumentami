@@ -10,9 +10,9 @@ import lombok.ToString;
 import org.apache.lucene.analysis.morfologik.MorfologikAnalyzer;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.IndexedEmbedded;
 import org.hibernate.search.annotations.SortableField;
 import org.hibernate.search.annotations.Store;
@@ -39,6 +39,7 @@ import java.time.Instant;
 @ToString
 @Entity(name = "document")
 @Table(name = "document", schema = "first")
+@Indexed
 public class Document implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,15 +64,15 @@ public class Document implements Serializable {
     @Field(index = Index.YES, analyze = Analyze.NO, store = Store.NO)
     @SortableField
     private Boolean paid;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @IndexedEmbedded
     private User owner;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @IndexedEmbedded
     private Type type;
     @OneToOne(mappedBy = "document", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     @JsonIgnore
-    @ContainedIn
+    @IndexedEmbedded
     private File file;
 }

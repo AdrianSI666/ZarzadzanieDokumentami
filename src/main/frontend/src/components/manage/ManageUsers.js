@@ -231,7 +231,7 @@ const ManageUsers = () => {
         <Table bordered hover>
           <thead>
             <tr>
-              <th className="th-ls">Imie</th>
+              <th className="th-ls">Imię</th>
               <th className="th-ms">Nazwisko</th>
               <th className="th-ss">Email</th>
               <th className="th-ss">Role</th>

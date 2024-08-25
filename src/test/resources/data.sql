@@ -40,7 +40,7 @@ VALUES (1, 3),
 
 INSERT INTO first.document (cost, date, paid, title, owner_id, type_id)
 VALUES (19.99, '2023-01-15 14:30:00', true, 'Document 1', 1, 1),
-       (24.99, '2023-02-20 09:45:00', false, 'Document 2', 2, 2),
+       (24.99, NULL, false, 'Document 2', 2, 2),
        (14.99, '2023-03-10 17:15:00', true, 'Document 3', 3, 3),
        (29.99, '2023-04-05 11:00:00', false, 'Document 4', 4, 4),
        (9.99, '2023-05-22 13:20:00', true, 'Document 5', 5, 5);

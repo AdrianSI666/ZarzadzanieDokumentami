@@ -18,6 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
+*.env
 
 ### NetBeans ###
 /nbproject/private/
@@ -33,3 +34,5 @@ build/
 .vscode/
 /src/main/frontend/node_modules/
 /data/
+/testData/
+/src/main/frontend/1package-lock.json

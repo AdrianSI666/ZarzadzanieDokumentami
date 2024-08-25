@@ -1,8 +1,5 @@
 package com.asledz.kancelaria_prawnicza.controller;
 
-import com.asledz.kancelaria_prawnicza.dto.FileDTO;
-import com.asledz.kancelaria_prawnicza.dto.NewUserDTO;
-import com.asledz.kancelaria_prawnicza.dto.UserDTO;
 import com.asledz.kancelaria_prawnicza.enums.Path;
 import com.asledz.kancelaria_prawnicza.utilis.Zipper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -101,7 +98,7 @@ class FileControllerIntegrationTest {
                         .headers(requestHeaders);
 
         String content = this.mockMvc.perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isCreated()) //This test will fail if Gotenberg Service isn't running at localhost port 3000
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andReturn().getResponse().getContentAsString();
 

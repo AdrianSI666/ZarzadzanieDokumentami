@@ -51,7 +51,6 @@ public class UserService implements UserDetailsService {
         if (pageProperties.containsKey(PAGE_NUMBER.name)) {
             page = Integer.parseInt(pageProperties.get(PAGE_NUMBER.name)) - 1;
         }
-        log.info("Page %d of all users".formatted(page));
         int pageSize = 5;
         if (pageProperties.containsKey(PAGE_SIZE.name)) {
             pageSize = Integer.parseInt(pageProperties.get(PAGE_SIZE.name));
@@ -62,7 +61,6 @@ public class UserService implements UserDetailsService {
     }
 
     public UserAuthorities getUserDetailsByEmail(String email) {
-        log.info("Getting user with email: %s".formatted(email));
         CustomSpecification<User> specByName = new CustomSpecification<>(new SearchCriteria("email", ":", email));
         User user = userRepository.findOne(specByName).orElseThrow(() -> new NotFoundException("Couldn't find user with email: %s".formatted(email)));
 
@@ -70,7 +68,6 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO getUserByEmail(String email) {
-        log.info("Getting user with email: %s".formatted(email));
         CustomSpecification<User> specByName = new CustomSpecification<>(new SearchCriteria("email", ":", email));
         User user = userRepository.findOne(specByName).orElseThrow(
                 () -> new NotFoundException("Couldn't find user with email: %s".formatted(email)));
@@ -78,7 +75,6 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO addUser(NewUserDTO newUserInformation) {
-        log.info("Adding user:" + newUserInformation);
         User user = User.builder()
                 .name(newUserInformation.name())
                 .surname(newUserInformation.surname())
@@ -93,7 +89,6 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO updateUser(UserDTO updatedUserInformation, Long id) {
-        log.info("Updating user with id: %d".formatted(id));
         User oldUser = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
         oldUser.setName(updatedUserInformation.name());
@@ -104,7 +99,6 @@ public class UserService implements UserDetailsService {
     }
 
     public void deleteUser(Long userId) {
-        log.info("Deleting user with id: %d".formatted(userId));
         User oldUser = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(String.format(USER_NOT_FOUND_MSG, userId)));
         oldUser.setEnabled(false);

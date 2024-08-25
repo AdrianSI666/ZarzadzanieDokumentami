@@ -177,36 +177,36 @@ class DocumentControllerTest {
     }
 
     /**
-     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long, Integer)}
+     * Method under test: {@link DocumentController#getDocumentsByUserIdWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsWithoutDate() throws Exception {
         when(documentService.getDocumentsByUserIdWithoutDate(anyLong(), anyInt())).thenReturn(new PageImpl<>(new ArrayList<>()));
         when(converter.convertDataFromPageToMap(Mockito.<Page<Object>>any())).thenReturn(new HashMap<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate", 1L);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate/{page}", 1L, 1);
         MockMvcBuilders.standaloneSetup(documentController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
+                .andExpect(MockMvcResultMatchers.content().string("{}"));
     }
 
     /**
-     * Method under test: {@link DocumentController#getDocumentsWithoutDate(Long, Integer)}
+     * Method under test: {@link DocumentController#getDocumentsByUserIdWithoutDate(Long, Integer)}
      */
     @Test
     void testGetDocumentsWithoutDate2() throws Exception {
         when(documentService.getDocumentsByUserIdWithoutDate(anyLong(), anyInt())).thenReturn(new PageImpl<>(new ArrayList<>()));
         when(converter.convertDataFromPageToMap(Mockito.<Page<Object>>any())).thenReturn(new HashMap<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate", 1L);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/documents/user/{id}/withoutDate/{page}", 1L, 1);
         requestBuilder.characterEncoding("Encoding");
         MockMvcBuilders.standaloneSetup(documentController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
+                .andExpect(MockMvcResultMatchers.content().string("{}"));
     }
 }
 

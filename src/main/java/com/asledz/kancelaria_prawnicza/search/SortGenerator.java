@@ -21,7 +21,6 @@ public class SortGenerator {
     public static List<Sort> getSortsFromMap(Map<String, String> params) {
         List<Sort> sortList = new ArrayList<>();
         params.forEach((key, value) -> {
-            log.info(key + " " + value);
             switch (SortEnum.valueOfSort(key) != null ? SortEnum.valueOfSort(key) : NULL) {
                 case SORT_TITLE -> {
                     Sort sort = Sort.by("title");

@@ -393,7 +393,6 @@ const Files = () => {
             <option value="5" key={5}>5</option>
             <option value="10" key={10}>10</option>
             <option value="20" key={20}>20</option>
-            <option value="30" key={30}>30</option>
           </Form.Select>
 
         </div>

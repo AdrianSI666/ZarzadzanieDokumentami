@@ -48,7 +48,7 @@ const LoginProfile = () => {
     return (
       <Container>
         {loginError===true && (<Alert key={"danger"} variant={"danger"}>
-          Złe dane logowania
+          Niepoprawne dane logowania
         </Alert>)}
         <Form onSubmit={(e) => {
           login(e, email, password);

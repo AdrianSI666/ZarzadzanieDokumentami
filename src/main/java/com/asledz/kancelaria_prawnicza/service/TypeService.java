@@ -31,7 +31,6 @@ public class TypeService {
      * @return all types that exists in database
      */
     public List<TypeDTO> getTypes() {
-        log.info("Getting all types.");
         return typeRepository.findAll(Sort.by("id")).stream().map(mapper::map).toList();
     }
 
@@ -41,7 +40,6 @@ public class TypeService {
      * @return type with given id, or throws NotFoundException
      */
     public Type getTypeById(Long typeId) {
-        log.info("Getting type by id: %d".formatted(typeId));
         return typeRepository.findById(typeId).orElseThrow(
                 () -> new NotFoundException(String.format(TYPE_NOT_FOUND_MSG, typeId)));
     }
@@ -53,7 +51,6 @@ public class TypeService {
      * @return type with given id from database and name
      */
     public TypeDTO addType(TypeDTO newTypeInformation) {
-        log.info("Adding type:" + newTypeInformation);
         Type type = Type.builder()
                 .name(newTypeInformation.name())
                 .build();

@@ -1,0 +1,112 @@
+[
+  {
+    "filter1": "text",
+    "value1": "nie dłużej niż do dnia",
+    "filter2": "filter_cost",
+    "value2": "100.00",
+    "sort1": "sort_title",
+    "value3": "true",
+    "sort2": "sort_cost",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "polski",
+    "filter2": "filter_date",
+    "value2": "2023-08-16T00:00:00.000Z",
+    "sort1": "sort_date",
+    "value3": "false",
+    "sort2": "sort_paid",
+    "value4": "true"
+  },
+  {
+    "filter1": "text",
+    "value1": "słowa",
+    "filter2": "filter_date",
+    "value2": "2023-10-17T00:00:00.000Z",
+    "sort1": "sort_cost",
+    "value3": "true",
+    "sort2": "sort_type",
+    "value4": "true"
+  },
+  {
+    "filter1": "text",
+    "value1": "bardzo",
+    "filter2": "filter_type_id",
+    "value2": "0",
+    "sort1": "sort_paid",
+    "value3": "true",
+    "sort2": "sort_title",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "nie",
+    "filter2": "filter_type_id",
+    "value2": "3",
+    "sort1": "sort_type",
+    "value3": "true",
+    "sort2": "sort_date",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "1",
+    "filter2": "filter_title",
+    "value2": "marszałka",
+    "sort1": "sort_cost",
+    "value3": "false",
+    "sort2": "sort_paid",
+    "value4": "true"
+  },
+  {
+    "filter1": "text",
+    "value1": "Data i miejsce urodzenia",
+    "filter2": "filter_cost",
+    "value2": "75.50",
+    "sort1": "sort_title",
+    "value3": "true",
+    "sort2": "sort_date",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "1200.00",
+    "filter2": "filter_date_before",
+    "value2": "2023-10-14T00:00:00.000Z",
+    "sort1": "sort_cost",
+    "value3": "true",
+    "sort2": "sort_paid",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "60.25",
+    "filter2": "filter_cost",
+    "value2": "120.00",
+    "sort1": "sort_title",
+    "value3": "false",
+    "sort2": "sort_cost",
+    "value4": "true"
+  },
+  {
+    "filter1": "text",
+    "value1": "tak",
+    "filter2": "filter_type_id",
+    "value2": "4",
+    "sort1": "sort_date",
+    "value3": "true",
+    "sort2": "sort_type",
+    "value4": "false"
+  },
+  {
+    "filter1": "text",
+    "value1": "2",
+    "filter2": "filter_title",
+    "value2": "wniosek",
+    "sort1": "sort_date",
+    "value3": "false",
+    "sort2": "sort_paid",
+    "value4": "true"
+  }
+]

@@ -37,7 +37,6 @@ public class FileController {
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
         FileDTO fileToSend = fileService.getFileById(id);
-        log.info("Sending file with id:" + id);
         String fileName = fileToSend.name() + fileToSend.extension();
         return ResponseEntity.ok()
                 .contentType(MediaType.valueOf(fileToSend.extension()))

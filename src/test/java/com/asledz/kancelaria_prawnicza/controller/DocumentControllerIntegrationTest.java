@@ -6,7 +6,6 @@ import com.asledz.kancelaria_prawnicza.enums.SortEnum;
 import com.asledz.kancelaria_prawnicza.search.Reindexer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ class DocumentControllerIntegrationTest {
         ZoneId zoneId = ZoneId.of("Europe/Warsaw");
 
         String stringDate1 = "2023-01-15 14:30:00";
-        String stringDate2 = "2023-02-20 09:45:00";
+
         String stringDate3 = "2023-03-10 17:15:00";
         String stringDate4 = "2023-04-05 11:00:00";
         String stringDate5 = "2023-05-22 13:20:00";
@@ -64,7 +63,7 @@ class DocumentControllerIntegrationTest {
                         .date(LocalDateTime.parse(stringDate1, dateTimeFormatter).atZone(zoneId).toInstant())
                         .paid(true).title("Document 1").typeId(1L).build(),
                 DocumentDTO.builder().id(2L).cost(24.99)
-                        .date(LocalDateTime.parse(stringDate2, dateTimeFormatter).atZone(zoneId).toInstant())
+                        .date(null)
                         .paid(false).title("Document 2").typeId(2L).build(),
                 DocumentDTO.builder().id(3L).cost(14.99)
                         .date(LocalDateTime.parse(stringDate3, dateTimeFormatter).atZone(zoneId).toInstant())
@@ -186,7 +185,7 @@ class DocumentControllerIntegrationTest {
         requestHeaders.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
         requestHeaders.setBearerAuth(token);
 
-        String content = this.mockMvc.perform(get("/documents/user/{id}/withoutDate", 2)
+        String content = this.mockMvc.perform(get("/documents/user/{id}/withoutDate/{page}", 2, 1)
                         .headers(requestHeaders))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
@@ -194,9 +193,10 @@ class DocumentControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        List<DocumentDTO> result = objectMapper.readValue(content, new TypeReference<>() {
+        Map<String, Object> result = objectMapper.readValue(content, new TypeReference<>() {
         });
-        assertEquals(0, result.size());
+        List<Object> data = (List<Object>) result.get("data");
+        assertEquals(1, data.size());
     }
 
     @Test

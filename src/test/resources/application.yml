@@ -23,7 +23,7 @@ spring:
         search:
           default: # <- This is the index name
             directory_provider: filesystem
-            indexBase: ./data/index
+            indexBase: ./testData/index
             index-manager: directory-based
   servlet:
     multipart:

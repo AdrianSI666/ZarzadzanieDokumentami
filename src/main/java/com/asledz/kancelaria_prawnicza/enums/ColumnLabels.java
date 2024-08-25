@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ColumnLabels {
-    TEXT("text"),
-    TITLE("document.title"),
-    DATE("document.date"),
-    COST("document.cost"),
-    PAID("document.paid"),
-    TYPE("document.type.name"),
-    TYPE_ID("document.type.typeId"),
-    OWNER_ID("document.owner.ownerId");
+    TEXT("file.text"),
+    TITLE("title"),
+    DATE("date"),
+    COST("cost"),
+    PAID("paid"),
+    TYPE("type.name"),
+    TYPE_ID("type.typeId"),
+    OWNER_ID("owner.ownerId");
 
     public final String path;
 

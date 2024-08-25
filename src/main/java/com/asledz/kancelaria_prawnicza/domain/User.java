@@ -15,6 +15,7 @@ import org.hibernate.search.annotations.Store;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,9 +48,9 @@ public class User implements Serializable {
     private String password;
     @Column(columnDefinition = "boolean default true")
     private Boolean enabled = true;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles;
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JsonBackReference(value = "owner")
     @ContainedIn
     private Collection<Document> documents;

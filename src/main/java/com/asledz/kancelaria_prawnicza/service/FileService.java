@@ -35,7 +35,6 @@ public class FileService {
     protected static final String FILE_NOT_FOUND_MSG = "Couldn't find file with id: %d";
 
     public FileDTO getFileById(Long id) {
-        log.info("Getting file with id: %d".formatted(id));
         return mapper.map(fileRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format(FILE_NOT_FOUND_MSG, id))
         ));
@@ -60,7 +59,6 @@ public class FileService {
                     () -> new NotFoundException("Failed to save file, because couldn't find user with given id: %d".formatted(userId)));
             Type newlyCreatedFileType = typeRepository.findById(0L).orElseThrow(
                     () -> new NotFoundException("Database lacks default type for newly added files"));
-            log.info(multipartFile.getContentType());
 
             String textData = TextExtractor.extractTextFromFile(multipartFile.getInputStream(),
                     multipartFile.getContentType(),
@@ -78,7 +76,6 @@ public class FileService {
                             .owner(user)
                             .build())
                     .build();
-            log.info("Saving file");
             fileRepository.save(file);
         } catch (IOException e) {
             throw new BadRequestException("Couldn't read file." + e.getMessage());

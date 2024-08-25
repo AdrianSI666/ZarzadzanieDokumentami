@@ -363,7 +363,11 @@ const Calendar = () => {
 
                         <Form.Group className="mb-3" controlId="formDate">
                             <Form.Label>Data do zapłaty</Form.Label>
-                            <Form.Control value={dateToPay != null ? new Date(dateToPay).toISOString().substring(0, 10) : new Date()} type="date" onChange={e => setDateToPay(e.target.value)} />
+                            <Form.Control 
+                            value={
+                                dateToPay != null ? dateToPay != "" ? new Date(dateToPay).toISOString().substring(0, 10) : new Date() : new Date()
+                              }
+                            type="date" onChange={e => setDateToPay(e.target.value)} />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="formCost">

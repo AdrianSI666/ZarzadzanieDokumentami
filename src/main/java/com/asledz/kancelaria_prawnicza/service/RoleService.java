@@ -23,7 +23,6 @@ public class RoleService {
     private final DTOMapper<Role, RoleDTO> mapper;
 
     public Page<RoleDTO> getRoles(Integer page) {
-        log.info("Page %d of all roles".formatted(page));
         int pageSize = 5;
         page -= 1;
         Pageable paging = PageRequest.of(page, pageSize);
@@ -32,7 +31,6 @@ public class RoleService {
     }
 
     public RoleDTO addRole(RoleDTO newRoleInformation) {
-        log.info("Adding Role:" + newRoleInformation);
         Role role = Role.builder()
                 .name(newRoleInformation.name())
                 .build();

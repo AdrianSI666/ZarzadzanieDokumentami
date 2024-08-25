@@ -1,0 +1,62 @@
+[
+  {
+    "sort": "sort_title",
+    "bool": "true",
+    "sort2": "sort_type",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_date",
+    "bool": "true",
+    "sort2": "sort_title",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_cost",
+    "bool": "true",
+    "sort2": "sort_date",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_paid",
+    "bool": "true",
+    "sort2": "sort_cost",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_type",
+    "bool": "true",
+    "sort2": "sort_date",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_title",
+    "bool": "false",
+    "sort2": "sort_cost",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_date",
+    "bool": "false",
+    "sort2": "sort_cost",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_cost",
+    "bool": "false",
+    "sort2": "sort_type",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_paid",
+    "bool": "false",
+    "sort2": "sort_date",
+    "bool2": "true"
+  },
+  {
+    "sort": "sort_type",
+    "bool": "false",
+    "sort2": "sort_title",
+    "bool2": "true"
+  }
+]

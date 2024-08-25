@@ -1,6 +1,6 @@
 package com.asledz.kancelaria_prawnicza.search;
 
-import com.asledz.kancelaria_prawnicza.domain.File;
+import com.asledz.kancelaria_prawnicza.domain.Document;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
 import com.asledz.kancelaria_prawnicza.enums.FilterAndSortEnum;
 import com.asledz.kancelaria_prawnicza.exception.BadRequestException;
@@ -32,7 +32,7 @@ public class QueriesGenerator {
             switch (FilterAndSortEnum.valueOfFilterAndSort(key) != null ? FilterAndSortEnum.valueOfFilterAndSort(key) : NULL) {
                 case FILTER_TEXT -> {
                     String prompt = values.get(0);
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, TEXT.path, prompt)) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, TEXT.path, prompt)) {
                         filterQueries.add(queryBuilder
                                 .phrase()
                                 .withSlop(1)
@@ -53,7 +53,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_TITLE -> {
                     String prompt = values.get(0);
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, TITLE.path, prompt)) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, TITLE.path, prompt)) {
                         filterQueries.add(queryBuilder
                                 .keyword()
                                 .fuzzy()
@@ -69,7 +69,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_DATE -> {
                     Instant dateFrom = Instant.parse(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, DATE.path, String.valueOf(dateFrom))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, DATE.path, String.valueOf(dateFrom))) {
                         RangeMatchingContext.FromRangeContext<Instant> from = queryBuilder
                                 .range()
                                 .onField(DATE.path)
@@ -87,7 +87,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_DATE_BEFORE -> {
                     Instant dateFrom = Instant.parse(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, DATE.path, String.valueOf(dateFrom))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, DATE.path, String.valueOf(dateFrom))) {
                         filterQueries.add(queryBuilder
                                 .range()
                                 .onField(DATE.path)
@@ -100,7 +100,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_COST -> {
                     double costFrom = Double.parseDouble(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, COST.path, String.valueOf(costFrom))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, COST.path, String.valueOf(costFrom))) {
                         RangeMatchingContext.FromRangeContext<Double> from = queryBuilder
                                 .range()
                                 .onField(COST.path)
@@ -118,7 +118,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_COST_TO -> {
                     double costTo = Double.parseDouble(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, COST.path, String.valueOf(costTo))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, COST.path, String.valueOf(costTo))) {
                         filterQueries.add(queryBuilder
                                 .range()
                                 .onField(COST.path)
@@ -130,7 +130,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_PAID -> {
                     boolean paid = Boolean.parseBoolean(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, PAID.path, String.valueOf(paid))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, PAID.path, String.valueOf(paid))) {
                         filterQueries.add(queryBuilder
                                 .keyword()
                                 .onField(PAID.path)
@@ -143,7 +143,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_TYPE_ID -> {
                     long id = Long.parseLong(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, TYPE_ID.path, String.valueOf(values.get(0)))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, TYPE_ID.path, String.valueOf(values.get(0)))) {
                         filterQueries.add(queryBuilder
                                 .keyword()
                                 .onField(TYPE_ID.path)
@@ -156,7 +156,7 @@ public class QueriesGenerator {
                 }
                 case FILTER_OWNER_ID -> {
                     long id = Long.parseLong(values.get(0));
-                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(File.class, OWNER_ID.path, String.valueOf(values.get(0)))) {
+                    if (searchUtils.iSearchPossibleOrAlreadyFilteredByAnalyzer(Document.class, OWNER_ID.path, String.valueOf(values.get(0)))) {
                         filterQueries.add(queryBuilder
                                 .keyword()
                                 .onField(OWNER_ID.path)

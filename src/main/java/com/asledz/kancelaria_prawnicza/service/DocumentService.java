@@ -1,9 +1,7 @@
 package com.asledz.kancelaria_prawnicza.service;
 
 import com.asledz.kancelaria_prawnicza.domain.Document;
-import com.asledz.kancelaria_prawnicza.domain.File;
 import com.asledz.kancelaria_prawnicza.domain.Type;
-import com.asledz.kancelaria_prawnicza.domain.User;
 import com.asledz.kancelaria_prawnicza.dto.DocumentDTO;
 import com.asledz.kancelaria_prawnicza.dto.FilterAndSortParameters;
 import com.asledz.kancelaria_prawnicza.dto.UserDTO;
@@ -25,6 +23,8 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -54,7 +54,7 @@ public class DocumentService {
     private final SearchUtils searchUtils;
     protected static final String DOCUMENT_NOT_FOUND_MSG = "Couldn't find document with id: %d";
 
-
+    @Cacheable(value = "Documents")
     public Page<DocumentDTO> getDocuments(Map<String, String> pageProperties) {
         int page = 0;
         if (pageProperties.containsKey(PAGE_NUMBER.name)) {
@@ -66,7 +66,6 @@ public class DocumentService {
             pageSize = Integer.parseInt(pageProperties.get(PAGE_SIZE.name));
             pageProperties.remove(PAGE_SIZE.name);
         }
-        log.info("Page %d of all documents".formatted(page));
         Pageable paging;
         if (pageProperties.size() > 0) {
             List<Sort> sortList = SortGenerator.getSortsFromMap(pageProperties);
@@ -83,7 +82,6 @@ public class DocumentService {
     }
 
     public DocumentDTO getDocumentById(Long id) {
-        log.info("Getting document with id: %d".formatted(id));
         return mapper.map(documentRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, id))
         ));
@@ -97,13 +95,13 @@ public class DocumentService {
      * @return Page of DocumentDTO containing results from Hibernate Search queries generated on
      * given parameter.
      */
+    @Cacheable(value = "DocumentsParameters")
     public Page<DocumentDTO> getDocumentsByParameters(MultiValueMap<String, String> parameters) {
         int page = 0;
         if (parameters.containsKey(PAGE_NUMBER.name)) {
             page = Integer.parseInt(parameters.get(PAGE_NUMBER.name).get(0)) - 1;
             parameters.remove(PAGE_NUMBER.name);
         }
-        log.info("Page %d of all documents by Parameters".formatted(page));
         int pageSize = 5;
         if (parameters.containsKey(PAGE_SIZE.name)) {
             pageSize = Integer.parseInt(parameters.get(PAGE_SIZE.name).get(0));
@@ -112,7 +110,7 @@ public class DocumentService {
         Pageable paging = PageRequest.of(page, pageSize);
 
         FullTextEntityManager fullTextEntityManager = searchUtils.getFullTextEntityManager();
-        QueryBuilder queryBuilder = searchUtils.getQueryBuilder(fullTextEntityManager, File.class);
+        QueryBuilder queryBuilder = searchUtils.getQueryBuilder(fullTextEntityManager, Document.class);
 
         FilterAndSortParameters filterAndSortParameters = QueriesGenerator.extractQueriesFromMultiMap(queryBuilder, searchUtils, parameters);
         if (filterAndSortParameters.filterQueries().isEmpty()) {
@@ -122,25 +120,25 @@ public class DocumentService {
         filterAndSortParameters.filterQueries().forEach(booleanJunction::must);
         Query combinedQuery = booleanJunction.createQuery();
         FullTextQuery fullTextQuery = fullTextEntityManager.createFullTextQuery(combinedQuery,
-                        File.class)
+                        Document.class)
                 .setFirstResult(pageSize * page)
                 .setMaxResults(pageSize);
         List<SortField> sortFields;
         if (!filterAndSortParameters.sortFields().isEmpty()) {
             sortFields = filterAndSortParameters.sortFields();
         } else {
-            sortFields = List.of(new SortField("document.documentId", SortField.Type.LONG, true));
+            sortFields = List.of(new SortField("documentId", SortField.Type.LONG, true));
         }
         org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortFields.toArray(new SortField[0]));
         fullTextQuery.setSort(sort);
         @SuppressWarnings("unchecked")
-        List<File> files = fullTextQuery.getResultList();
-        Page<Document> documentPage = new PageImpl<>(files.stream().map(File::getDocument).toList(), paging, fullTextQuery.getResultSize());
+        List<Document> documents = fullTextQuery.getResultList();
+        Page<Document> documentPage = new PageImpl<>(documents, paging, fullTextQuery.getResultSize());
         return documentPage.map(mapper::map);
     }
 
+    @CacheEvict(cacheNames = {"Documents", "DocumentsParameters", "DocumentsDate"})
     public DocumentDTO updateDocument(DocumentDTO updatedDocumentInformation, Long documentId, String username) {
-        log.info("Updating document with id: %d".formatted(documentId));
         Document oldDocument = documentRepository.findById(documentId).orElseThrow(
                 () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, documentId)));
         UserDTO userDTO = userService.getUserByEmail(username);
@@ -152,14 +150,22 @@ public class DocumentService {
             oldDocument.setType(type);
         }
         if (updatedDocumentInformation.title() != null) oldDocument.setTitle(updatedDocumentInformation.title());
-        if (updatedDocumentInformation.date() != null) oldDocument.setDate(updatedDocumentInformation.date());
+        if (updatedDocumentInformation.date() != null) {
+            if (updatedDocumentInformation.date().toEpochMilli() != 0) {
+                oldDocument.setDate(updatedDocumentInformation.date());
+            } else {
+                oldDocument.setDate(null);
+            }
+        } else {
+            oldDocument.setDate(null);
+        }
         if (updatedDocumentInformation.cost() != null) oldDocument.setCost(updatedDocumentInformation.cost());
         if (updatedDocumentInformation.paid() != null) oldDocument.setPaid(updatedDocumentInformation.paid());
         return mapper.map(documentRepository.save(oldDocument));
     }
 
+    @CacheEvict(cacheNames = {"Documents", "DocumentsParameters", "DocumentsDate"})
     public void deleteDocument(Long documentId, String username) {
-        log.info("Deleting Document with id: %d".formatted(documentId));
         Document document = documentRepository.findById(documentId).orElseThrow(
                 () -> new NotFoundException(String.format(DOCUMENT_NOT_FOUND_MSG, documentId)));
         UserDTO userDTO = userService.getUserByEmail(username);
@@ -174,6 +180,7 @@ public class DocumentService {
      * @return List of documents that given user owns and are not given dates. Used to give
      * user an option to change null values in date.
      */
+    @Cacheable(value = "DocumentsDate")
     public Page<DocumentDTO> getDocumentsByUserIdWithoutDate(Long userId, Integer page) {
         if (page == null) page = 1;
         page--;
@@ -183,14 +190,6 @@ public class DocumentService {
                 userId)).and(new CustomSpecification<>(new SearchCriteria("date",
                 ":",
                 "null")));
-        /*CustomSpecification<Document> test = new CustomSpecification<>(new SearchCriteria("date",
-                ":",
-                "null"));
-        var test2 = documentRepository.findAll(test.and(new CustomSpecification<>(new SearchCriteria("owner_id",
-                ":",
-                userId))));
-        var test1 = documentRepository.findAll(documentsByUserId).stream().filter(document -> document.getDate() == null).map(mapper::map).toList();*/
-
         Pageable paging = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "id"));
         return documentRepository.findAll(documentsByUserId, paging).map(mapper::map);
     }

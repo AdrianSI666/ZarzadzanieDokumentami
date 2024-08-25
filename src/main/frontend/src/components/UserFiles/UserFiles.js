@@ -187,7 +187,7 @@ const UserFiles = () => {
     getDocuments(page, pageSize, sortParams, filterParams)
   }, [page]);
 
-  const onDrop = useCallback((acceptedFiles, page) => {
+  const onDrop = useCallback((acceptedFiles) => {
     setMessage("Pliki są przetwarzane na serwerze.")
     Promise.allSettled(acceptedFiles.map(async (file) => {
       const formData = new FormData();
@@ -205,7 +205,10 @@ const UserFiles = () => {
         })
     })).then(()=> {
       setMessage("Plik pomyślnie dodane do bazy oraz zresetowano wyszukiwanie.")
-      getDocuments(page, pageSize, sortParams, filterParams)
+      setFilterParams({ "filter_owner_id": id })
+      setSortParams({})
+      setPage(1)
+      getDocuments(1, pageSize, {}, { "filter_owner_id": id })
       setTimeout(function () {
         setMessage(undefined)
       }, 4000);
@@ -527,7 +530,6 @@ const UserFiles = () => {
             <option value="5" key={5}>5</option>
             <option value="10" key={10}>10</option>
             <option value="20" key={20}>20</option>
-            <option value="30" key={30}>30</option>
           </Form.Select>
 
         </div>
@@ -881,7 +883,11 @@ const UserFiles = () => {
 
             <Form.Group className="mb-3" controlId="formDate">
               <Form.Label>Data do zapłaty</Form.Label>
-              <Form.Control value={dateToPay != null ? new Date(dateToPay).toISOString().substring(0, 10) : new Date()} type="date" onChange={e => setDateToPay(e.target.value)} />
+              <Form.Control 
+              value={
+                dateToPay != null ? dateToPay != "" ? new Date(dateToPay).toISOString().substring(0, 10) : new Date() : new Date()
+              }
+              type="date" onChange={e => setDateToPay(e.target.value)} />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formCost">
