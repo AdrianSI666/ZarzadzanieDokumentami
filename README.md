@@ -101,3 +101,6 @@ By aplikacja była bezpieczniejsza zaleca się zmianę protokołu HTTP na HTTPS,
 - Jeśli tego dokonacie, to trzeba zmienić w folderze /src/main/frontend/src/components/redux/config.js na lini 6 z localhost na odpowiedni adres IP komputera na którym ta aplikacja jest włączona oraz na linii 7 odpowiedni port, który został najprawdopodobniej zmieniony podczas włączania protokołu SSL w celu uzyskania komunikacji przez HTTPS.
 - Na koniec w pliku /src/main/com/asledz/kancelaria_prawnicza/security/securityConfig.java na linii 70 również zmienić napis localhost i liczbę po dwukropku na odpowiednią tak jak w kroku wyżej.
 Jeśli dokonacie zmian pamiętajcie by skompilować zmiany do nowego pliku wykonywalnego .jar.
+
+
+Cała aplikacja wykorzystuje Hibernate Search do tworzenia indeksu, wyszukiwania po nim oraz synchronizacji danych w nim zawartych z bazą danych.
